@@ -2,56 +2,84 @@
 #define SRC_INCLUDE_TETROMINO_HPP
 
 #include <algorithm>
+#include <climits>
 #include <initializer_list>
 #include <utility>
 #include <vector>
 
+
 namespace tetrominoes {
 
-class Shape {
+using Block = std::pair<int, int>;
+
+class Tetromino {
 public:
-    Shape(std::initializer_list<std::pair<int, int>> shape) :
-        m_curShape(shape),
-        greatestLen(0)
+    Tetromino(std::initializer_list<Block> shape) :
+        m_shape(shape),
+        m_greatestSide(INT_MIN),
+        m_lowestPointOnY(INT_MIN),
+        m_leftmostPointOnX(INT_MAX),
+        m_rightmostPointOnX(INT_MIN)
+        
     {
-        for (const auto& p : m_curShape) {
-            const_cast<int&>(greatestLen) = std::max(p.first + 1, p.second + 1);    
+        for (const auto& p : shape) {
+            m_greatestSide = std::max(m_greatestSide, std::max(p.first + 1, p.second + 1));    
+            m_lowestPointOnY = std::max(m_lowestPointOnY, p.first);
+            m_leftmostPointOnX = std::min(m_leftmostPointOnX, p.second);
+            m_rightmostPointOnX = std::max(m_rightmostPointOnX, p.second);
         }
     }
 
-    inline const auto& previouShape() const {
-        return m_preShape;
+    Tetromino(const Tetromino&) = default;
+    Tetromino(Tetromino&&) noexcept = default;
+    Tetromino& operator=(const Tetromino&) noexcept = default; 
+    Tetromino& operator=(Tetromino&&) noexcept = default;
+
+public:
+    inline const auto& shape() const noexcept {
+        return m_shape;
     }
 
-    inline const auto& currentShape() const {
-        return m_curShape;
+    inline int greatestSide() const {
+        return m_greatestSide;
     }
-    
-    virtual void moveDownOneSquare() final;
-    virtual void moveLeftOneSquare() final;
-    virtual void moveRightOneSquare() final;
 
-    virtual void rotateRigth() final;
+    inline int lowestPointOnY() const {
+        return m_lowestPointOnY;
+    }
 
-    virtual ~Shape() {}
+    inline int leftmostPointOnX() const {
+        return m_leftmostPointOnX;
+    }
+
+    inline int rightmostPointOnX() const {
+        return m_rightmostPointOnX;
+    }
+        
+    void moveDownOneSquare() noexcept;
+    void moveLeftOneSquare() noexcept;
+    void moveRightOneSquare() noexcept;
+
+    // TODO: 
+    void rotateRigth() {};
+
+    bool containsBlock(Block block) const noexcept;
+
+    virtual ~Tetromino() {}
+
 protected:
-    std::vector<std::pair<int, int>> m_preShape, m_curShape ;
+    std::vector<Block> m_shape ;
+    int m_greatestSide;
+    int m_lowestPointOnY;
+    int m_leftmostPointOnX;
+    int m_rightmostPointOnX;
 
-private:
-    const int greatestLen;
-
-private:
-    void reflectShape();
-    void setPreShape() {
-        m_preShape = m_curShape;
-    };
-    
 };
 
-class O_shape : public Shape {
+class O_shape : public Tetromino {
 public:
     O_shape() :
-        Shape(
+        Tetromino(
             {
                 {0, 0}, {0, 1},
                 {1, 0}, {1, 1}
@@ -60,10 +88,10 @@ public:
     {}
 };
 
-class I_shape : public Shape {
+class I_shape : public Tetromino {
 public:
     I_shape() :
-        Shape(
+        Tetromino(
             {
                 {0, 0},
                 {1, 0},
@@ -74,10 +102,10 @@ public:
     {}
 };
 
-class S_shape : public Shape {
+class S_shape : public Tetromino {
 public:    
     S_shape() :
-        Shape(
+        Tetromino(
             {           {0, 1}, {0, 2},
                 {1, 0}, {1, 1}
             }
@@ -85,10 +113,10 @@ public:
     {}
 };
 
-class Z_shape : public Shape {
+class Z_shape : public Tetromino {
 public:    
     Z_shape() :
-        Shape(
+        Tetromino(
             {
                 {0, 0}, {0, 1},
                         {1, 1}, {1, 2}
@@ -97,10 +125,10 @@ public:
     {}
 };
 
-class L_shape : public Shape {
+class L_shape : public Tetromino {
 public:    
     L_shape() :
-        Shape(
+        Tetromino(
             {
                 {0, 0},
                 {1, 0},
@@ -111,10 +139,10 @@ public:
 };
 
 
-class J_shape : public Shape {
+class J_shape : public Tetromino {
 public:    
     J_shape() :
-        Shape(
+        Tetromino(
             {
                         {0, 1},
                         {1, 1},
@@ -124,10 +152,10 @@ public:
     {}
 };
 
-class T_shape : public Shape {
+class T_shape : public Tetromino {
 public:    
     T_shape() :
-        Shape(
+        Tetromino(
             {
                 {0, 0}, {0, 1}, {0, 2},
                         {1, 1} 
@@ -136,7 +164,10 @@ public:
     {}
 };
 
+Tetromino getRandomTetromino();
 
+
+ 
 } // namespace tetrominoes
 
 

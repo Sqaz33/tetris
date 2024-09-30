@@ -8,4 +8,5 @@ project(tetris)
 add_executable(main 
     src/main.cpp
     src/tetromino.cpp
+    src/tetris.cpp
 )

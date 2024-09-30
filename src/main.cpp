@@ -1,52 +1,37 @@
+#include <chrono>
 #include <iostream>
+#include <thread>
 #include <vector>
+#include <string>
 
-#include "include/shapes.hpp"
+#include "include/tetromino.hpp"
+#include "include/tetris.hpp"
 
-using namespace shapes;
+using namespace tetris;
+using namespace tetrominoes;
 
 namespace {
-using Row = std::vector<int>;
-using Field = std::vector<Row>;
 
-void printField(const Field& field) {
+void printField(const TetirsGameField& field) {
+    std::cout << std::string(field.size(), '\n');
     for (const auto& row : field) {
         for (const auto& n : row) {
             std::cout << (n ? '@' : '\'') << ' '; 
         }
         std::cout << '\n';
     }
-    std::cout << "--------------------------------------------\n";
-}
-
-void setShapeAtField(Field& field, const Shape& shape) {
-    for (const auto& p : shape.currentShape()) {
-        field[p.first][p.second] = 1;
-    }
-}
-
-void clearShapeAtField(Field& field, const Shape& shape) {
-    for (const auto& p : shape.previouShape()) {
-        field[p.first][p.second] = 0;
-    }
+    // std::cout << "--------------------------------------------\n";
 }
 
 
 } // namespace
 
 int main() {
-    Field field(42, Row(21, 0));
-    L_shape L;
-
-    for (int i = 0; i < 10; ++i) {
-        L.moveRightOneSquare();
-        L.moveDownOneSquare();
+    Tetris tetris;
+    bool f = true;
+    while (tetris.updateGameField()) {
+        printField(tetris.gameField());
+        f = f ? tetris.moveRightCurTetromino() : !tetris.moveLeftCurTetromino();
+        std::this_thread::sleep_for(std::chrono::milliseconds(150));
     }
-    setShapeAtField(field, L);
-    printField(field);
-
-    L.rotateRigth();
-    clearShapeAtField(field, L);
-    setShapeAtField(field, L);
-    printField(field);
 }
