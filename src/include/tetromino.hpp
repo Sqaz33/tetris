@@ -1,12 +1,12 @@
-#ifndef SRC_INCLUDE_SHAPES_HPP
-#define SRC_INCLUDE_SHAPES_HPP
+#ifndef SRC_INCLUDE_TETROMINO_HPP
+#define SRC_INCLUDE_TETROMINO_HPP
 
 #include <algorithm>
 #include <initializer_list>
 #include <utility>
 #include <vector>
 
-namespace shapes {
+namespace tetrominoes {
 
 class Shape {
 public:
@@ -137,7 +137,8 @@ public:
 };
 
 
-} // namespace shapes
+} // namespace tetrominoes
 
 
-#endif // SRC_INCLUDE_SHAPES_HPP
+
+#endif // SRC_INCLUDE_TETROMINO_HPP

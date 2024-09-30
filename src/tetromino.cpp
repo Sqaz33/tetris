@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <utility>
 
-namespace shapes {
+namespace tetrominoes {
 
 void Shape::moveDownOneSquare() {
     setPreShape();
@@ -29,8 +29,8 @@ void Shape::moveRightOneSquare() {
 }
 
 void Shape::reflectShape() {
-    // TODO: 
-    std::unordered_map<int, std::vector<std::pair<int, int>>>
+    std::unordered_map<int, std::vector<std::pair<int, int>>> lines;
+    for (auto& )
 }
 
 void Shape::rotateRigth() {
