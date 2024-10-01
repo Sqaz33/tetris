@@ -5,7 +5,7 @@ namespace tetris {
 bool Tetris::canMovedDownCurTetromino() const noexcept {
     for (const auto& p : m_curTetromino->shape()) {
         if (p.first < fieldHeight - 1  &&
-            m_field[p.first + 1][p.second] &&
+            hasBlockAt(p.first + 1, p.second) &&
             !m_curTetromino->containsBlock({p.first + 1, p.second})) 
         {
             return false;
@@ -17,7 +17,7 @@ bool Tetris::canMovedDownCurTetromino() const noexcept {
 bool Tetris::canMovedLeftCurTetromino() const noexcept {
     for (const auto& p : m_curTetromino->shape()) {
         if (p.second > 0  &&
-            m_field[p.first][p.second - 1] &&
+            hasBlockAt(p.first, p.second - 1) &&
             !m_curTetromino->containsBlock({p.first, p.second - 1})) 
         {
             return false;
@@ -29,7 +29,7 @@ bool Tetris::canMovedLeftCurTetromino() const noexcept {
 bool Tetris::canMovedRightCurTetromino() const noexcept {
     for (const auto& p : m_curTetromino->shape()) {
         if (p.second < fieldWidth - 1 &&
-            m_field[p.first][p.second + 1] &&
+            hasBlockAt(p.first, p.second + 1) &&
             !m_curTetromino->containsBlock({p.first, p.second + 1})) 
         {
             return false;
@@ -66,7 +66,7 @@ bool Tetris::moveRightCurTetromino() noexcept {
     for (auto& p : tempTetromino.shape()) {
         canRotate = canRotate && p.first >= 0 && p.first < fieldHeight &&
                                  p.second >= 0 && p.second < fieldWidth &&
-                                 (m_curTetromino->containsBlock(p) || !m_field[p.first][p.second]);
+                                 (m_curTetromino->containsBlock(p) || !hasBlockAt(p.first, p.second));
                                 
     }
     
@@ -82,16 +82,43 @@ bool Tetris::moveRightCurTetromino() noexcept {
 
 
 void Tetris::setCurTetrominoOnField() noexcept {
+    setCurTetrominoGhostOnField();
     for (const auto& p : m_curTetromino->shape()) {
         m_field[p.first][p.second] = 1;
     }
 }
 
+void Tetris::setCurTetrominoGhostOnField() noexcept {
+    deleteCurTetrominoGhostOnField();
+    auto cpy = *m_curTetromino.get();
+    while (canMovedDownCurTetromino()) {
+        m_curTetromino->moveDownOneSquare();
+    }
+    for (const auto& p : m_curTetromino->shape()) {
+        m_field[p.first][p.second] = 2;
+    }
+    m_curTetrominoGhost = std::move(m_curTetromino);
+    m_curTetromino = std::make_unique<decltype(cpy)>(cpy);
+}
+
 void Tetris::deleteCurTetrominoOnField() noexcept {
+    if (!m_curTetromino) {
+        return;
+    }
     for (const auto& p : m_curTetromino->shape()) {
         m_field[p.first][p.second] = 0;
     }
 }
+
+void Tetris::deleteCurTetrominoGhostOnField() noexcept {
+    if (!m_curTetrominoGhost) {
+        return;
+    }
+    for (const auto& p : m_curTetrominoGhost->shape()) {
+        m_field[p.first][p.second] = m_field[p.first][p.second] == 1 ? 1 : 0;
+    }
+}
+
 
 static void shiftColumn(TetirsGameField& matrix, int startRow, int column) {
     for (int i = startRow; i > 0; --i) {
@@ -108,7 +135,7 @@ void Tetris::lowerAllLinesUnder(size_t start) noexcept {
 
 void Tetris::deleteFullLines() noexcept {
     for (int i = fieldHeight - 1; i >= 0; --i) {
-        if (std::find(m_field[i].begin(), m_field[i].end(), 0) == m_field[i].end()) {
+        if (std::find_if(m_field[i].begin(), m_field[i].end(), [](int x){return x == 0 || x == 2;}) == m_field[i].end())  {
             std::transform(
                 m_field[i].begin(), m_field[i].end(), m_field[i].begin(), 
                 [](int) {return 0;}

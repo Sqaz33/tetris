@@ -32,6 +32,10 @@ public:
         return fieldHeight;
     }
 
+    inline bool hasBlockAt(size_t x, size_t y) const noexcept {
+        return m_field[x][y] == 1;
+    }
+
     bool updateGameField();
 
     bool rotateRightCurTetromino();
@@ -41,6 +45,8 @@ protected:
     TetirsGameField m_field;
     size_t fieldWidth, fieldHeight;
     std::unique_ptr<tetrominoes::Tetromino> m_curTetromino;
+    std::unique_ptr<tetrominoes::Tetromino> m_curTetrominoGhost;
+
 
 private:
     bool canMovedDownCurTetromino() const noexcept;
@@ -51,8 +57,9 @@ private:
 
     void setCurTetrominoOnField() noexcept;    
     void deleteCurTetrominoOnField() noexcept;
+    void setCurTetrominoGhostOnField() noexcept;
+    void deleteCurTetrominoGhostOnField() noexcept;
 
-    // TODO: rename
     void lowerAllLinesUnder(size_t start) noexcept;
     void deleteFullLines() noexcept;
 

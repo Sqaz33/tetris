@@ -35,7 +35,7 @@ void printField(const TetirsGameField& field) {
     std::cout << std::string(field.size(), '\n');
     for (const auto& row : field) {
         for (const auto& n : row) {
-            std::cout << (n ? '@' : '\'') << ' '; 
+            std::cout << (n == 1 ? '@' : n == 2 ? '#' : '\'') << ' '; 
         }
         std::cout << '\n';
     }
@@ -82,5 +82,6 @@ int main() {
     }
 
     setTerminalMode(false);
+    std::cout << "Game Over!\n";
     return 0;
 }
