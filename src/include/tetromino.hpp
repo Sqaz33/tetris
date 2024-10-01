@@ -24,10 +24,8 @@ public:
     {
         for (const auto& p : shape) {
             m_greatestSide = std::max(m_greatestSide, std::max(p.first + 1, p.second + 1));    
-            m_lowestPointOnY = std::max(m_lowestPointOnY, p.first);
-            m_leftmostPointOnX = std::min(m_leftmostPointOnX, p.second);
-            m_rightmostPointOnX = std::max(m_rightmostPointOnX, p.second);
         }
+        setShapeBoundaries();
     }
 
     Tetromino(const Tetromino&) = default;
@@ -55,13 +53,16 @@ public:
     inline int rightmostPointOnX() const {
         return m_rightmostPointOnX;
     }
+
+    inline int highestPointOnY() const {
+        return m_highestPointOnY;
+    }
         
     void moveDownOneSquare() noexcept;
     void moveLeftOneSquare() noexcept;
     void moveRightOneSquare() noexcept;
 
-    // TODO: 
-    void rotateRigth() {};
+    void rotateRigth() noexcept;
 
     bool containsBlock(Block block) const noexcept;
 
@@ -73,7 +74,21 @@ protected:
     int m_lowestPointOnY;
     int m_leftmostPointOnX;
     int m_rightmostPointOnX;
+    int m_highestPointOnY;
+    
+private:
+    void swapShapeAxis() noexcept;
+    void reflectShape() noexcept;
 
+
+    void setShapeBoundaries() {
+        for (const auto& p : m_shape) {
+            m_lowestPointOnY = std::max(m_lowestPointOnY, p.first);
+            m_leftmostPointOnX = std::min(m_leftmostPointOnX, p.second);
+            m_rightmostPointOnX = std::max(m_rightmostPointOnX, p.second);
+            m_highestPointOnY = std::min(m_highestPointOnY, p.first);
+        }
+    }
 };
 
 class O_shape : public Tetromino {

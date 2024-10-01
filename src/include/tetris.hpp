@@ -34,8 +34,7 @@ public:
 
     bool updateGameField();
 
-    // TODO: 
-    bool rotateRightCurTetromino() {};
+    bool rotateRightCurTetromino();
     bool moveLeftCurTetromino() noexcept;
     bool moveRightCurTetromino() noexcept;
 protected:

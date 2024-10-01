@@ -32,6 +32,7 @@ int main() {
     while (tetris.updateGameField()) {
         printField(tetris.gameField());
         f = f ? tetris.moveRightCurTetromino() : !tetris.moveLeftCurTetromino();
-        std::this_thread::sleep_for(std::chrono::milliseconds(150));
+        tetris.rotateRightCurTetromino();
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }

@@ -58,6 +58,25 @@ bool Tetris::moveRightCurTetromino() noexcept {
     return true;
 }
 
+ bool Tetris::rotateRightCurTetromino() {
+    auto tempTetromino = *m_curTetromino.get();
+    tempTetromino.rotateRigth();
+    
+    bool canRotate = true;
+    for (auto& p : tempTetromino.shape()) {
+        canRotate = canRotate && p.first >= 0 && p.first < fieldHeight &&
+                                 p.second >= 0 && p.second < fieldWidth &&
+                                (m_curTetromino->containsBlock(p) || !m_field[p.first][p.second]);
+    }
+    
+    if (canRotate) {
+        m_curTetromino = 
+            std::make_unique<tetrominoes::Tetromino>(std::move(tempTetromino));
+    }
+    
+    return canRotate;
+ } 
+
 
 void Tetris::setCurTetrominoOnField() noexcept {
     for (const auto& p : m_curTetromino->shape()) {
