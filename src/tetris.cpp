@@ -1,5 +1,7 @@
 #include "include/tetris.hpp"
 
+#include <cmath>
+
 namespace tetris {
 
 bool Tetris::canMovedDownCurTetromino() const noexcept {
@@ -119,8 +121,11 @@ void Tetris::deleteCurTetrominoGhostOnField() noexcept {
     }
 }
 
+void Tetris::updateScore() {
+    m_score += lineDestroy ? std::pow(2, lineDestroy) : 0;
+}
 
-static void shiftColumn(TetirsGameField& matrix, int startRow, int column) {
+static void shiftColumn(TetrisGameField& matrix, int startRow, int column) {
     for (int i = startRow; i > 0; --i) {
         matrix[i][column] = matrix[i - 1][column];
     }
@@ -141,6 +146,7 @@ void Tetris::deleteFullLines() noexcept {
                 [](int) {return 0;}
             );
             lowerAllLinesUnder(i);
+            ++lineDestroy;
         }
     }
 }
@@ -161,9 +167,11 @@ bool Tetris::updateGameField() {
         m_curTetromino->moveDownOneSquare();
         setCurTetrominoOnField();
     } else {
+        deleteFullLines();
+        updateScore();
+        lineDestroy = 0;
         return setNextTetromino();
     }
-    deleteFullLines();
     return true;
 }
 

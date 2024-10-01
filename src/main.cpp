@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 
+// TODO: когда-нибудь перделать всю хрень
+
 #include <termios.h>
 #include <unistd.h>
 
@@ -30,9 +32,11 @@ void setTerminalMode(bool enable)
 }
 
 
-void printField(const TetirsGameField& field) {
+void printField(const TetrisGameField& field, size_t score) {
     // clearScreen();
     std::cout << std::string(field.size(), '\n');
+    std::cout << "Your score: " << score << '\n';
+    std::cout << std::string(field[0].size() * 2 - 1, '-') << '\n';
     for (const auto& row : field) {
         for (const auto& n : row) {
             std::cout << (n == 1 ? '@' : n == 2 ? '#' : '\'') << ' '; 
@@ -64,7 +68,7 @@ int main() {
                 break;
             case 'B':
                 tetris.updateGameField();
-                printField(tetris.gameField());
+                printField(tetris.gameField(), tetris.score());
                 break;
             case 'C':
                 tetris.moveRightCurTetromino();
@@ -78,7 +82,7 @@ int main() {
         {
             break;
         }
-        printField(tetris.gameField());
+        printField(tetris.gameField(), tetris.score());
     }
 
     setTerminalMode(false);

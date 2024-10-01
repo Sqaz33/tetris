@@ -10,7 +10,7 @@
 namespace tetris {
 
 using Line = std::vector<int>;
-using TetirsGameField = std::vector<Line>;
+using TetrisGameField = std::vector<Line>;
 
 class Tetris {
 public:
@@ -36,16 +36,22 @@ public:
         return m_field[x][y] == 1;
     }
 
+    inline size_t score() const noexcept {
+        return m_score;
+    }
+
     bool updateGameField();
 
     bool rotateRightCurTetromino();
     bool moveLeftCurTetromino() noexcept;
     bool moveRightCurTetromino() noexcept;
 protected:
-    TetirsGameField m_field;
+    TetrisGameField m_field;
     size_t fieldWidth, fieldHeight;
     std::unique_ptr<tetrominoes::Tetromino> m_curTetromino;
     std::unique_ptr<tetrominoes::Tetromino> m_curTetrominoGhost;
+    int lineDestroy = 0;
+    size_t m_score = 0;
 
 
 private:
@@ -62,6 +68,8 @@ private:
 
     void lowerAllLinesUnder(size_t start) noexcept;
     void deleteFullLines() noexcept;
+
+    void updateScore();
 
 };
 
