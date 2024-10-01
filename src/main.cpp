@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <thread>
+#include <mutex>
 
 // TODO: когда-нибудь перделать всю хрень
 
@@ -32,12 +34,12 @@ void setTerminalMode(bool enable)
 }
 
 
-void printField(const TetrisGameField& field, size_t score) {
+void printGame(const Tetris& tetris) {
     // clearScreen();
-    std::cout << std::string(field.size(), '\n');
-    std::cout << "Your score: " << score << '\n';
-    std::cout << std::string(field[0].size() * 2 - 1, '-') << '\n';
-    for (const auto& row : field) {
+    std::cout << std::string(tetris.gameFieldHieght(), '\n');
+    std::cout << "Your score: " << tetris.score() << '\n';
+    std::cout << std::string(tetris.gameFieldWidth() * 2 - 1, '-') << '\n';
+    for (const auto& row : tetris.gameField()) {
         for (const auto& n : row) {
             std::cout << (n == 1 ? '@' : n == 2 ? '#' : '\'') << ' '; 
         }
@@ -45,19 +47,22 @@ void printField(const TetrisGameField& field, size_t score) {
     }
 }
 
+Tetris tetris;
+bool running = true;
+std::mutex mtx;
 
-
-} // namespace
-
-int main() {
-    Tetris tetris;
+void input() {
     char c;
     setTerminalMode(true);
-
-    std::cout << "Press arrow keys (ESC to quit):\n";
-    while (tetris.updateGameField())
+    std::cout << "Press arrow keys:\n";
+    while (true)
     {
         c = getchar();
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            if (!running) break;  // Поток завершится, если running == false
+        }
+
         if (c == '\033') // ESC
         {
             getchar();    // Skip [
@@ -68,10 +73,9 @@ int main() {
                 break;
             case 'B':
                 tetris.updateGameField();
-                printField(tetris.gameField(), tetris.score());
                 break;
             case 'C':
-                tetris.moveRightCurTetromino();
+                tetris.moveRightCurTetromino(); 
                 break;
             case 'D':
                 tetris.moveLeftCurTetromino();
@@ -82,10 +86,32 @@ int main() {
         {
             break;
         }
-        printField(tetris.gameField(), tetris.score());
+        printGame(tetris);
     }
-
     setTerminalMode(false);
+}
+
+void updater() {
+    while (true) {
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            if (!running) break;  // Остановка потока
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        running = tetris.updateGameField();
+        printGame(tetris);
+    } 
+}
+
+} // namespace
+
+
+int main() {
+    std::thread game(updater);
+    std::thread in(input);
+    game.join();
+    in.join();
+
     std::cout << "Game Over!\n";
     return 0;
 }
