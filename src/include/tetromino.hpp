@@ -16,11 +16,7 @@ class Tetromino {
 public:
     Tetromino(std::initializer_list<Block> shape) :
         m_shape(shape),
-        m_greatestSide(INT_MIN),
-        m_lowestPointOnY(INT_MIN),
-        m_leftmostPointOnX(INT_MAX),
-        m_rightmostPointOnX(INT_MIN)
-        
+        m_greatestSide(INT_MIN)
     {
         for (const auto& p : shape) {
             m_greatestSide = std::max(m_greatestSide, std::max(p.first + 1, p.second + 1));    
@@ -28,10 +24,42 @@ public:
         setShapeBoundaries();
     }
 
-    Tetromino(const Tetromino&) = default;
-    Tetromino(Tetromino&&) noexcept = default;
-    Tetromino& operator=(const Tetromino&) noexcept = default; 
-    Tetromino& operator=(Tetromino&&) noexcept = default;
+    Tetromino(const Tetromino& other) {
+        m_shape = other.m_shape;
+        m_greatestSide = other.m_greatestSide;
+        m_highestPointOnY = other.m_highestPointOnY;
+        m_lowestPointOnY = other.m_lowestPointOnY;
+        m_leftmostPointOnX = other.m_leftmostPointOnX;
+        m_rightmostPointOnX = other.m_rightmostPointOnX;
+    }
+
+    Tetromino(Tetromino&& other) noexcept {
+        m_shape = std::move(other.m_shape);
+        m_greatestSide = other.m_greatestSide;
+        m_highestPointOnY = other.m_highestPointOnY;
+        m_lowestPointOnY = other.m_lowestPointOnY;
+        m_leftmostPointOnX = other.m_leftmostPointOnX;
+        m_rightmostPointOnX = other.m_rightmostPointOnX;
+    }
+
+    Tetromino& operator=(const Tetromino& other) noexcept {
+        m_shape = other.m_shape;
+        m_greatestSide = other.m_greatestSide;
+        m_highestPointOnY = other.m_highestPointOnY;
+        m_lowestPointOnY = other.m_lowestPointOnY;
+        m_leftmostPointOnX = other.m_leftmostPointOnX;
+        m_rightmostPointOnX = other.m_rightmostPointOnX;
+        return *this;
+    }
+    Tetromino& operator=(Tetromino&& other) noexcept {
+        m_shape = std::move(other.m_shape);
+        m_greatestSide = other.m_greatestSide;
+        m_highestPointOnY = other.m_highestPointOnY;
+        m_lowestPointOnY = other.m_lowestPointOnY;
+        m_leftmostPointOnX = other.m_leftmostPointOnX;
+        m_rightmostPointOnX = other.m_rightmostPointOnX;
+        return *this;
+    }
 
 public:
     inline const auto& shape() const noexcept {
@@ -46,16 +74,16 @@ public:
         return m_lowestPointOnY;
     }
 
+    inline int highestPointOnY() const {
+        return m_highestPointOnY;
+    }
+
     inline int leftmostPointOnX() const {
         return m_leftmostPointOnX;
     }
 
     inline int rightmostPointOnX() const {
         return m_rightmostPointOnX;
-    }
-
-    inline int highestPointOnY() const {
-        return m_highestPointOnY;
     }
         
     void moveDownOneSquare() noexcept;
@@ -82,11 +110,16 @@ private:
 
 
     void setShapeBoundaries() {
+        m_lowestPointOnY = INT_MIN;
+        m_highestPointOnY = INT_MAX;
+        m_leftmostPointOnX = INT_MAX;
+        m_rightmostPointOnX = INT_MIN;
         for (const auto& p : m_shape) {
             m_lowestPointOnY = std::max(m_lowestPointOnY, p.first);
+            m_highestPointOnY = std::min(m_highestPointOnY, p.first);
+
             m_leftmostPointOnX = std::min(m_leftmostPointOnX, p.second);
             m_rightmostPointOnX = std::max(m_rightmostPointOnX, p.second);
-            m_highestPointOnY = std::min(m_highestPointOnY, p.first);
         }
     }
 };

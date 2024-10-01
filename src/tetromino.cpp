@@ -53,15 +53,11 @@ void Tetromino::swapShapeAxis() noexcept {
 }
 
 void Tetromino::reflectShape() noexcept {
-    int mid = (m_leftmostPointOnX + m_rightmostPointOnX) << 1;
-    int shift;
+    int relX;
+    int maxXLen = m_rightmostPointOnX - m_leftmostPointOnX + 1;
     for (auto& p : m_shape) {
-        shift = std::abs(p.second - mid);
-        if (p.second > mid) {
-            p.second -= shift; 
-        } else if (p.second < mid) {
-            p.second += shift;
-        }
+        relX = p.second - m_leftmostPointOnX;
+        p.second = m_leftmostPointOnX + maxXLen - relX - 1;
     }
 }
 

@@ -66,12 +66,15 @@ bool Tetris::moveRightCurTetromino() noexcept {
     for (auto& p : tempTetromino.shape()) {
         canRotate = canRotate && p.first >= 0 && p.first < fieldHeight &&
                                  p.second >= 0 && p.second < fieldWidth &&
-                                (m_curTetromino->containsBlock(p) || !m_field[p.first][p.second]);
+                                 (m_curTetromino->containsBlock(p) || !m_field[p.first][p.second]);
+                                
     }
     
     if (canRotate) {
+        deleteCurTetrominoOnField();
         m_curTetromino = 
             std::make_unique<tetrominoes::Tetromino>(std::move(tempTetromino));
+        setCurTetrominoOnField();
     }
     
     return canRotate;
@@ -97,7 +100,7 @@ static void shiftColumn(TetirsGameField& matrix, int startRow, int column) {
     matrix[0][column] = 0;
 }
 
-void Tetris::lower_dummy(size_t start) noexcept {
+void Tetris::lowerAllLinesUnder(size_t start) noexcept {
     for (int j = 0; j < fieldWidth; ++j) {
         shiftColumn(m_field, start, j);
     }
@@ -110,7 +113,7 @@ void Tetris::deleteFullLines() noexcept {
                 m_field[i].begin(), m_field[i].end(), m_field[i].begin(), 
                 [](int) {return 0;}
             );
-            lower_dummy(i);
+            lowerAllLinesUnder(i);
         }
     }
 }

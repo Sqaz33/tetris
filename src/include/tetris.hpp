@@ -53,7 +53,7 @@ private:
     void deleteCurTetrominoOnField() noexcept;
 
     // TODO: rename
-    void lower_dummy(size_t start) noexcept;
+    void lowerAllLinesUnder(size_t start) noexcept;
     void deleteFullLines() noexcept;
 
 };
