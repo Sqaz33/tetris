@@ -109,19 +109,7 @@ private:
     void reflectShape() noexcept;
 
 
-    void setShapeBoundaries() {
-        m_lowestPointOnY = INT_MIN;
-        m_highestPointOnY = INT_MAX;
-        m_leftmostPointOnX = INT_MAX;
-        m_rightmostPointOnX = INT_MIN;
-        for (const auto& p : m_shape) {
-            m_lowestPointOnY = std::max(m_lowestPointOnY, p.first);
-            m_highestPointOnY = std::min(m_highestPointOnY, p.first);
-
-            m_leftmostPointOnX = std::min(m_leftmostPointOnX, p.second);
-            m_rightmostPointOnX = std::max(m_rightmostPointOnX, p.second);
-        }
-    }
+    void setShapeBoundaries() noexcept;
 };
 
 class O_shape : public Tetromino {
@@ -213,11 +201,7 @@ public:
 };
 
 Tetromino getRandomTetromino();
-
-
  
 } // namespace tetrominoes
-
-
 
 #endif // SRC_INCLUDE_TETROMINO_HPP

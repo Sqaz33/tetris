@@ -33,13 +33,12 @@ void setTerminalMode(bool enable)
     }
 }
 
-
 void printGame(const Tetris& tetris) {
     // clearScreen();
-    std::cout << std::string(tetris.gameFieldHieght(), '\n');
+    std::cout << std::string(tetris.fieldHieght(), '\n');
     std::cout << "Your score: " << tetris.score() << '\n';
-    std::cout << std::string(tetris.gameFieldWidth() * 2 - 1, '-') << '\n';
-    for (const auto& row : tetris.gameField()) {
+    std::cout << std::string(tetris.fieldWidth() * 2 - 1, '-') << '\n';
+    for (const auto& row : tetris.field()) {
         for (const auto& n : row) {
             std::cout << (n == 1 ? '@' : n == 2 ? '#' : '\'') << ' '; 
         }
@@ -47,7 +46,7 @@ void printGame(const Tetris& tetris) {
     }
 }
 
-Tetris tetris;
+Tetris tetr;
 bool running = true;
 std::mutex mtx;
 
@@ -69,16 +68,16 @@ void input() {
             switch (getchar())
             {
             case 'A':
-                tetris.rotateRightCurTetromino();
+                tetr.rotateRightCurTetromino();
                 break;
             case 'B':
-                tetris.updateGameField();
+                tetr.updateGameField();
                 break;
             case 'C':
-                tetris.moveRightCurTetromino(); 
+                tetr.moveRightCurTetromino(); 
                 break;
             case 'D':
-                tetris.moveLeftCurTetromino();
+                tetr.moveLeftCurTetromino();
                 break;
             }
         }
@@ -86,7 +85,7 @@ void input() {
         {
             break;
         }
-        printGame(tetris);
+        printGame(tetr);
     }
     setTerminalMode(false);
 }
@@ -98,8 +97,8 @@ void updater() {
             if (!running) break;  // Остановка потока
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        running = tetris.updateGameField();
-        printGame(tetris);
+        running = tetr.updateGameField();
+        printGame(tetr);
     } 
 }
 
@@ -112,6 +111,6 @@ int main() {
     game.join();
     in.join();
 
-    std::cout << "Game Over!\n";
+    std::cout << "Game Over!\n Your score: " << tetr.score() << '\n';
     return 0;
 }

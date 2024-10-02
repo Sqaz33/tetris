@@ -6,7 +6,6 @@
 
 #include "tetromino.hpp"
 
-
 namespace tetris {
 
 using Line = std::vector<int>;
@@ -16,67 +15,88 @@ class Tetris {
 public:
     Tetris(size_t width = 21, size_t height = 41) :
         m_field(height, Line(width, 0)),
-        fieldWidth(width), fieldHeight(height)
+        m_fieldWidth(width), m_fieldHeight(height)
     {}
 
 public:
-    inline const auto& gameField() const noexcept {
+    inline const auto& field() const noexcept {
         return m_field;
     } 
 
-    inline size_t gameFieldWidth() const noexcept {
-        return fieldWidth;
+    inline size_t fieldWidth() const noexcept {
+        return m_fieldWidth;
     }
     
-    inline size_t gameFieldHieght() const noexcept {
-        return fieldHeight;
-    }
-
-    inline bool hasBlockAt(size_t x, size_t y) const noexcept {
-        return m_field[x][y] == 1;
+    inline size_t fieldHieght() const noexcept {
+        return m_fieldHeight;
     }
 
     inline size_t score() const noexcept {
         return m_score;
     }
 
+    inline bool hasBlockAt(size_t i, size_t j) const noexcept {
+        return m_field[i][j] == blockVal();
+    }
+
+    inline bool hasGhostBlockAt(size_t i, size_t j) const noexcept {
+        return m_field[i][j] == ghostBlockVal();
+    }
+    
+    static constexpr int voidBlockVal() {
+        return 0;
+    } 
+
+    static constexpr int blockVal() {
+        return 1;
+    } 
+
+    static constexpr int ghostBlockVal() {
+        return 2;
+    } 
+
     bool updateGameField();
 
     bool rotateRightCurTetromino();
-    bool moveLeftCurTetromino() noexcept;
-    bool moveRightCurTetromino() noexcept;
+    bool moveLeftCurTetromino();
+    bool moveRightCurTetromino();
+
 protected:
+
     TetrisGameField m_field;
-    size_t fieldWidth, fieldHeight;
+    size_t m_fieldWidth, m_fieldHeight;
     std::unique_ptr<tetrominoes::Tetromino> m_curTetromino;
     std::unique_ptr<tetrominoes::Tetromino> m_curTetrominoGhost;
-    int lineDestroy = 0;
+
+    int linesDestroyed = 0;
     size_t m_score = 0;
 
-
 private:
-    bool canMovedDownCurTetromino() const noexcept;
-    bool canMovedLeftCurTetromino() const noexcept;
-    bool canMovedRightCurTetromino() const noexcept;
+    bool canMovedDownTetromino(const tetrominoes::Tetromino& tetromino) const;
+    bool canMovedLeftTetromino(const tetrominoes::Tetromino& tetromino) const;
+    bool canMovedRightTetromino(const tetrominoes::Tetromino& tetromino) const;
  
     bool setNextTetromino();
 
-    void setCurTetrominoOnField() noexcept;    
-    void deleteCurTetrominoOnField() noexcept;
-    void setCurTetrominoGhostOnField() noexcept;
-    void deleteCurTetrominoGhostOnField() noexcept;
+    inline void setBlockAt(size_t i, size_t j)  ;
+    inline void deleteBlockAt(size_t i, size_t j);
 
-    void lowerAllLinesUnder(size_t start) noexcept;
-    void deleteFullLines() noexcept;
+    inline void setGhostBlockAt(size_t i, size_t j);
+    inline void deleteGhostBlockAt(size_t i, size_t j);
 
-    void updateScore();
+    void setCurTetrominoOnField();    
+    void deleteCurTetrominoOnField();
 
+    void setCurTetrominoGhostOnField();
+    void deleteCurTetrominoGhostOnField();
+
+    void lowerAllLinesUnder(size_t start);
+    void deleteFullLines();
+
+    void updateScore() noexcept;
 };
 
-inline int maxTetrominoSide() { return 4; }
-
 } // namespace tetris
-
 
 #endif // SRC_INCLUDE_TETRIS_HPP
 
