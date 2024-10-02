@@ -75,6 +75,7 @@ private:
     bool canMovedDownTetromino(const tetrominoes::Tetromino& tetromino) const;
     bool canMovedLeftTetromino(const tetrominoes::Tetromino& tetromino) const;
     bool canMovedRightTetromino(const tetrominoes::Tetromino& tetromino) const;
+    bool canRotateRightTetromino(const tetrominoes::Tetromino& tetromino) const; 
  
     bool setNextTetromino();
 

@@ -40,6 +40,21 @@ bool Tetris::canMovedRightTetromino(const tetrominoes::Tetromino& tetromino) con
     return tetromino.rightmostPointOnX() < m_fieldWidth - 1;
 }
 
+bool Tetris::canRotateRightTetromino(const tetrominoes::Tetromino& tetromino) const {
+    auto tempTetromino = tetromino;
+    tempTetromino.rotateRigth();
+
+    bool canRotate = true;
+    for (auto& p : tempTetromino.shape()) {
+        canRotate = canRotate && p.first >= 0 && p.first < m_fieldHeight &&
+                                    p.second >= 0 && p.second < m_fieldWidth &&
+                                    (tetromino.containsBlock(p) || !hasBlockAt(p.first, p.second));
+                                
+    }
+    return canRotate;
+    
+}
+
 bool Tetris::moveLeftCurTetromino() {
     if (!canMovedLeftTetromino(*m_curTetromino.get())) {
         return false;
@@ -61,25 +76,12 @@ bool Tetris::moveRightCurTetromino() {
 }
 
 bool Tetris::rotateRightCurTetromino() {
-    auto tempTetromino = *m_curTetromino.get();
-    tempTetromino.rotateRigth();
-
-    bool canRotate = true;
-    for (auto& p : tempTetromino.shape()) {
-        canRotate = canRotate && p.first >= 0 && p.first < m_fieldHeight &&
-                                    p.second >= 0 && p.second < m_fieldWidth &&
-                                    (m_curTetromino->containsBlock(p) || !hasBlockAt(p.first, p.second));
-                                
-    }
-
-    if (canRotate) {
+    if (canRotateRightTetromino(*m_curTetromino.get())) {
         deleteCurTetrominoOnField();
-        m_curTetromino = 
-            std::make_unique<tetrominoes::Tetromino>(std::move(tempTetromino));
+        m_curTetromino->rotateRigth();
         setCurTetrominoOnField();
     }
-
-    return canRotate;
+    return false;
 } 
 
 
