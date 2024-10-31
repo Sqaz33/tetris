@@ -42,7 +42,7 @@ bool Tetromino::containsBlock(Block block) const noexcept {
 }
 
 void Tetromino::swapShapeAxis() noexcept {
-    int x_c = m_leftmostPointOnX, y_c = m_highestPointOnY;
+    int x_c = m_leftmostPointOnX, y_c = m_highestPointOnY ;
     int x, y;
     for (auto& p : m_shape) {
         x = p.second - x_c;
@@ -67,11 +67,8 @@ void Tetromino::setShapeBoundaries() noexcept {
 }
 
 void Tetromino::reflectShape() noexcept {
-    int relX;
-    int maxXLen = m_rightmostPointOnX - m_leftmostPointOnX + 1;
     for (auto& p : m_shape) {
-        relX = p.second - m_leftmostPointOnX;
-        p.second = m_leftmostPointOnX + maxXLen - relX - 1;
+        p.second = m_rightmostPointOnX + m_leftmostPointOnX - p.second ;
     }
 }
 
