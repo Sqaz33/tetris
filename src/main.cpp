@@ -9,8 +9,8 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "include/tetromino.hpp"
-#include "include/tetris.hpp"
+#include "../include/tetromino.hpp"
+#include "../include/tetris.hpp"
 
 using namespace tetris;
 using namespace tetrominoes;
@@ -40,7 +40,7 @@ void printGame(const Tetris& tetris) {
     std::cout << std::string(tetris.fieldWidth() * 2 - 1, '-') << '\n';
     for (const auto& row : tetris.field()) {
         for (const auto& n : row) {
-            std::cout << (n == 1 ? '@' : n == 2 ? '#' : '\'') << ' '; 
+            std::cout << (n == BlockType::FILLED ? '@' : n == BlockType::GHOST ? '#' : '\'') << ' '; 
         }
         std::cout << '\n';
     }

@@ -3,57 +3,33 @@
 
 #include <vector>
 #include <memory>
+#include <cstddef>
 
 #include "tetromino.hpp"
 
 namespace tetris {
 
-using Line = std::vector<int>;
+enum class BlockType : std::uint8_t {
+    FILLED = 0,
+    VOID,
+    GHOST
+};
+
+using Line = std::vector<BlockType>;
 using TetrisGameField = std::vector<Line>;
 
 class Tetris {
 public:
-    Tetris(size_t width = 21, size_t height = 41) :
-        m_field(height, Line(width, 0)),
-        m_fieldWidth(width), m_fieldHeight(height)
-    {}
+    Tetris(size_t width = 21, size_t height = 41);
 
 public:
-    inline const auto& field() const noexcept {
-        return m_field;
-    } 
-
-    inline size_t fieldWidth() const noexcept {
-        return m_fieldWidth;
-    }
+    const TetrisGameField& field() const noexcept;
+    size_t fieldWidth() const noexcept;
+    size_t fieldHieght() const noexcept;
+    size_t score() const noexcept;
+    bool hasBlockAt(size_t i, size_t j) const noexcept;
+    bool hasGhostBlockAt(size_t i, size_t j) const noexcept;
     
-    inline size_t fieldHieght() const noexcept {
-        return m_fieldHeight;
-    }
-
-    inline size_t score() const noexcept {
-        return m_score;
-    }
-
-    inline bool hasBlockAt(size_t i, size_t j) const noexcept {
-        return m_field[i][j] == blockVal();
-    }
-
-    inline bool hasGhostBlockAt(size_t i, size_t j) const noexcept {
-        return m_field[i][j] == ghostBlockVal();
-    }
-    
-    static constexpr int voidBlockVal() {
-        return 0;
-    } 
-
-    static constexpr int blockVal() {
-        return 1;
-    } 
-
-    static constexpr int ghostBlockVal() {
-        return 2;
-    } 
 
     bool updateGameField();
 
@@ -79,11 +55,11 @@ private:
  
     bool setNextTetromino();
 
-    inline void setBlockAt(size_t i, size_t j)  ;
-    inline void deleteBlockAt(size_t i, size_t j);
+    void setBlockAt(size_t i, size_t j)  ;
+    void deleteBlockAt(size_t i, size_t j);
 
-    inline void setGhostBlockAt(size_t i, size_t j);
-    inline void deleteGhostBlockAt(size_t i, size_t j);
+    void setGhostBlockAt(size_t i, size_t j);
+    void deleteGhostBlockAt(size_t i, size_t j);
 
     void setCurTetrominoOnField();    
     void deleteCurTetrominoOnField();
