@@ -15,6 +15,9 @@ enum class TetrominoType {
     O, I, S, Z, L, J, T
 };
 
+class Tetromino;
+Tetromino getRandomTetromino();
+
 class Tetromino {
 public:
     Tetromino(std::initializer_list<Block> shape, TetrominoType type); 
@@ -36,6 +39,15 @@ public:
     void rotateRigth() noexcept;
 
     bool containsBlock(Block block) const noexcept;
+
+private:
+    void swapShapeAxis() noexcept;
+    void reflectShape() noexcept;
+
+    void setShapeBoundaries() noexcept;
+
+
+ 
 private:
     std::vector<Block> m_shape ;
     int m_greatestSide;
@@ -44,12 +56,6 @@ private:
     int m_rightmostPointOnX;
     int m_highestPointOnY;
     TetrominoType type_;
-    
-private:
-    void swapShapeAxis() noexcept;
-    void reflectShape() noexcept;
-
-    void setShapeBoundaries() noexcept;
 };
 
 Tetromino create_O_shape();
@@ -59,7 +65,6 @@ Tetromino create_Z_shape();
 Tetromino create_L_shape();
 Tetromino create_J_shape();
 Tetromino create_T_shape();
-Tetromino getRandomTetromino();
  
 } // namespace tetrominoes
 

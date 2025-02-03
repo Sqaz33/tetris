@@ -189,14 +189,29 @@ Tetromino getRandomTetromino() {
     std::mt19937 gen(rd()); 
     std::uniform_int_distribution<> distrib(0, 6);
     int r = distrib(gen);
-    return r == 0 ? create_O_shape() :
-           r == 1 ? create_I_shape() :
-           r == 2 ? create_S_shape() :
-           r == 3 ? create_Z_shape() :
-           r == 4 ? create_L_shape() :
-           r == 5 ? create_J_shape() :
-           r == 6 ? create_T_shape() :
-           Tetromino({}, TetrominoType::O);
+    switch (r) {
+        case 0: 
+            return create_O_shape();
+            break;
+        case 1:
+            return create_I_shape();
+            break;
+        case 2:
+            return create_S_shape();
+            break;
+        case 3:
+            return create_Z_shape();
+            break;
+        case 4:
+            return create_L_shape();
+            break;
+        case 5:
+            return create_J_shape();
+            break;
+        case 6:
+            return create_T_shape();
+            break;
+    }
 }
 
 } // namespace shapes 

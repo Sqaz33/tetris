@@ -18,34 +18,24 @@ enum class BlockType : std::uint8_t {
 using Line = std::vector<BlockType>;
 using TetrisGameField = std::vector<Line>;
 
-class Tetris {
+class TetrisGameModel {
 public:
-    Tetris(size_t width = 21, size_t height = 41);
+    TetrisGameModel(size_t width = 21, size_t height = 41);
 
 public:
     const TetrisGameField& field() const noexcept;
     size_t fieldWidth() const noexcept;
     size_t fieldHieght() const noexcept;
     size_t score() const noexcept;
+    // const Tetromino& curTetromino() const;
     bool hasBlockAt(size_t i, size_t j) const noexcept;
     bool hasGhostBlockAt(size_t i, size_t j) const noexcept;
-    
 
-    bool updateGameField();
+    bool update();
 
     bool rotateRightCurTetromino();
     bool moveLeftCurTetromino();
     bool moveRightCurTetromino();
-
-protected:
-
-    TetrisGameField m_field;
-    size_t m_fieldWidth, m_fieldHeight;
-    std::unique_ptr<tetrominoes::Tetromino> m_curTetromino;
-    std::unique_ptr<tetrominoes::Tetromino> m_curTetrominoGhost;
-
-    int linesDestroyed = 0;
-    size_t m_score = 0;
 
 private:
     bool canMovedDownTetromino(const tetrominoes::Tetromino& tetromino) const;
@@ -71,6 +61,15 @@ private:
     void deleteFullLines();
 
     void updateScore() noexcept;
+
+private:
+    TetrisGameField m_field;
+    size_t m_fieldWidth, m_fieldHeight;
+    std::unique_ptr<tetrominoes::Tetromino> m_curTetromino;
+    std::unique_ptr<tetrominoes::Tetromino> m_curTetrominoGhost;
+
+    int linesDestroyed = 0;
+    size_t m_score = 0;
 };
 
 } // namespace tetris
