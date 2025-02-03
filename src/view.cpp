@@ -167,7 +167,16 @@ void DrawableTetrisField::drawGrid_(sf::RenderWindow& window, sf::Vector2f start
 }
 
 // void DrawableTetrisField::eraseCurTetromino_(sf::RenderWindow& window, sf::Vector2f start) {
-//     for (const auto& )
+//     for (const auto& b : model_->curTetromino().shape()) {
+//         drawBlockAt_(b.first, b.second, start, window, sf::Color::White);
+//     }
 // }
+
+// void DrawableTetrisField::eraseCurTetrominoGhost_(sf::RenderWindow& window, sf::Vector2f start) {
+//     for (const auto& b : model_->curTetrominoGhost().shape()) {
+//         drawBlockAt_(b.first, b.second, start, window, sf::Color::White);
+//     }
+// }
+
 
 } // namespace view

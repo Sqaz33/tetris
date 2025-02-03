@@ -87,8 +87,10 @@ private:
                       sf::Color blockColor);
     void drawGrid_(sf::RenderWindow& window, sf::Vector2f start);
 
-    void eraseCurTetromino_(sf::RenderWindow& window, sf::Vector2f start);
-
+    // void drawCurTetromino_(sf::RenderWindow& window, sf::Vector2f start);
+    // void drawCurTetrominoGhost_(sf::RenderWindow& window, sf::Vector2f start);
+    // void eraseCurTetromino_(sf::RenderWindow& window, sf::Vector2f start);
+    // void eraseCurTetrominoGhost_(sf::RenderWindow& window, sf::Vector2f start);
 private:    
     std::shared_ptr<tetris::TetrisGameModel> model_;
     const float gridThickness_;

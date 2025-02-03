@@ -27,7 +27,8 @@ public:
     size_t fieldWidth() const noexcept;
     size_t fieldHieght() const noexcept;
     size_t score() const noexcept;
-    // const Tetromino& curTetromino() const;
+    const tetrominoes::Tetromino& curTetromino() const;
+    const tetrominoes::Tetromino& curTetrominoGhost() const;
     bool hasBlockAt(size_t i, size_t j) const noexcept;
     bool hasGhostBlockAt(size_t i, size_t j) const noexcept;
 
@@ -36,6 +37,7 @@ public:
     bool rotateRightCurTetromino();
     bool moveLeftCurTetromino();
     bool moveRightCurTetromino();
+    
 
 private:
     bool canMovedDownTetromino(const tetrominoes::Tetromino& tetromino) const;
@@ -65,8 +67,8 @@ private:
 private:
     TetrisGameField m_field;
     size_t m_fieldWidth, m_fieldHeight;
-    std::unique_ptr<tetrominoes::Tetromino> m_curTetromino;
-    std::unique_ptr<tetrominoes::Tetromino> m_curTetrominoGhost;
+    tetrominoes::Tetromino m_curTetromino;
+    tetrominoes::Tetromino m_curTetrominoGhost;
 
     int linesDestroyed = 0;
     size_t m_score = 0;

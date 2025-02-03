@@ -2,9 +2,11 @@
 #include <chrono>
 #include <memory>
 #include <optional>
+#include <mutex>
+
 
 #include <SFML/Window.hpp>
-
+#include <SFML/Graphics.hpp>
 
 #include "../include/tetromino.hpp"
 #include "../include/tetris.hpp"
@@ -13,10 +15,33 @@
 using namespace tetris;
 using namespace tetrominoes;
 
+std::mutex mut;
 
+
+void dummyKeyboardHendler(std::shared_ptr<TetrisGameModel> model, sf::RenderWindow& window) {
+    using namespace sf::Keyboard;
+    using namespace std::chrono_literals;
+    // while (window.isOpen()) {
+        {
+            // std::lock_guard<std::mutex> lk{mut};
+            if (isKeyPressed(Key::Left)) {
+                model->moveLeftCurTetromino();
+            } else if (isKeyPressed(Key::Right)) {
+                model->moveRightCurTetromino();
+            } else if (isKeyPressed(Key::Up)) {
+                model->rotateRightCurTetromino();
+            } else if (isKeyPressed(Key::Down)) { 
+                model->update();
+                model->update();
+                model->update();
+            }
+        }
+        // std::this_thread::sleep_for(70ms);
+    // }
+}
 
 int main() {
-
+    using namespace std::chrono_literals;
     sf::RenderWindow window(sf::VideoMode({550, 1050}), "Tetris");
     view::DrawableFramedWindow comp(window, 10, sf::Color::White);
 
@@ -25,28 +50,42 @@ int main() {
 
     comp.pushComponent(drawableField);
 
-    window.clear();
-    comp.draw(window, {0.f, 0.f});
-    window.display();
-
-
     auto closeHandle = [&window] {
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>())
                 window.close();
             }   
     };
-    model->update();
-    model->update();
-    model->update();
-    model->update();
+
+
+    // std::thread t1(dummyKeyboardHendler, model, std::ref(window));
+
+    auto modelUpdater = [&] {
+        while (window.isOpen()) {
+            {
+                std::lock_guard<std::mutex> lk{mut};
+                model->update();
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(200ms));
+        }
+    };
+
+    std::thread t2(modelUpdater);
+
 
     while (window.isOpen()) { 
-        closeHandle();
-        window.clear();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        comp.draw(window, {0.f, 0.f});
-        window.display();
+        {   
+            std::lock_guard<std::mutex> lk{mut};
+            closeHandle();
+            dummyKeyboardHendler(model, window);
+            window.clear();
+            comp.draw(window, {0.f, 0.f});
+            window.display();
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50ms));
+
     }
+
+    t2.join();
 
 }

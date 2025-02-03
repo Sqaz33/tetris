@@ -21,6 +21,7 @@ Tetromino getRandomTetromino();
 class Tetromino {
 public:
     Tetromino(std::initializer_list<Block> shape, TetrominoType type); 
+    Tetromino() = default;
 
 public:
     const std::vector<Block>& shape() const noexcept;
@@ -46,8 +47,6 @@ private:
 
     void setShapeBoundaries() noexcept;
 
-
- 
 private:
     std::vector<Block> m_shape ;
     int m_greatestSide;

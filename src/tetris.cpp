@@ -5,9 +5,14 @@
 namespace tetris {
 
 TetrisGameModel::TetrisGameModel(size_t width, size_t height) :
-    m_field(height, Line(width, BlockType::VOID)),
-    m_fieldWidth(width), m_fieldHeight(height)
-{}
+    m_field(height, Line(width, BlockType::VOID))
+    , m_fieldWidth(width)
+    , m_fieldHeight(height)
+{   
+    setNextTetromino();
+    setCurTetrominoOnField();
+    setCurTetrominoGhostOnField();
+}
 
 const TetrisGameField& TetrisGameModel::field() const noexcept {
     return m_field;
@@ -25,6 +30,13 @@ size_t TetrisGameModel::score() const noexcept {
     return m_score;
 }
 
+const tetrominoes::Tetromino& TetrisGameModel::curTetromino() const {
+    return m_curTetromino;
+}
+
+const tetrominoes::Tetromino& TetrisGameModel::curTetrominoGhost() const {
+    return m_curTetrominoGhost;
+}
 
 bool TetrisGameModel::hasBlockAt(size_t i, size_t j) const noexcept {
     return m_field[i][j] == BlockType::FILLED;
@@ -85,29 +97,29 @@ bool TetrisGameModel::canRotateRightTetromino(const tetrominoes::Tetromino& tetr
 }
 
 bool TetrisGameModel::moveLeftCurTetromino() {
-    if (!canMovedLeftTetromino(*m_curTetromino.get())) {
+    if (!canMovedLeftTetromino(m_curTetromino)) {
         return false;
     }
     deleteCurTetrominoOnField();
-    m_curTetromino->moveLeftOneSquare();
+    m_curTetromino.moveLeftOneSquare();
     setCurTetrominoOnField();
     return true;
 }
 
 bool TetrisGameModel::moveRightCurTetromino() {
-    if (!canMovedRightTetromino(*m_curTetromino.get())) {
+    if (!canMovedRightTetromino(m_curTetromino)) {
         return false;
     }
     deleteCurTetrominoOnField();
-    m_curTetromino->moveRightOneSquare();
+    m_curTetromino.moveRightOneSquare();
     setCurTetrominoOnField();
     return true;
 }
 
 bool TetrisGameModel::rotateRightCurTetromino() {
-    if (canRotateRightTetromino(*m_curTetromino.get())) {
+    if (canRotateRightTetromino(m_curTetromino)) {
         deleteCurTetrominoOnField();
-        m_curTetromino->rotateRigth();
+        m_curTetromino.rotateRigth();
         setCurTetrominoOnField();
     }
     return false;
@@ -131,41 +143,31 @@ void TetrisGameModel::deleteGhostBlockAt(size_t i, size_t j) {
 }
 
 void TetrisGameModel::setCurTetrominoOnField() {
-    if (!m_curTetromino) {
-        return;
-    }
     setCurTetrominoGhostOnField();
-    for (const auto& p : m_curTetromino->shape()) {
+    for (const auto& p : m_curTetromino.shape()) {
         setBlockAt(p.first, p.second);
     }
 }
 
 void TetrisGameModel::setCurTetrominoGhostOnField() {
     deleteCurTetrominoGhostOnField();
-    m_curTetrominoGhost = 
-        std::make_unique<tetrominoes::Tetromino>(*m_curTetromino.get());
-    while (canMovedDownTetromino(*m_curTetrominoGhost.get())) {
-        m_curTetrominoGhost->moveDownOneSquare();
+    m_curTetrominoGhost = m_curTetromino;
+    while (canMovedDownTetromino(m_curTetrominoGhost)) {
+        m_curTetrominoGhost.moveDownOneSquare();
     }
-    for (const auto& p : m_curTetrominoGhost->shape()) {
+    for (const auto& p : m_curTetrominoGhost.shape()) {
         setGhostBlockAt(p.first, p.second);
     }
 }
 
 void TetrisGameModel::deleteCurTetrominoOnField() {
-    if (!m_curTetromino) {
-        return;
-    }
-    for (const auto& p : m_curTetromino->shape()) {
+    for (const auto& p : m_curTetromino.shape()) {
         deleteBlockAt(p.first, p.second);
     }
 }
 
 void TetrisGameModel::deleteCurTetrominoGhostOnField() {
-    if (!m_curTetrominoGhost) {
-        return;
-    }
-    for (const auto& p : m_curTetrominoGhost->shape()) {
+    for (const auto& p : m_curTetrominoGhost.shape()) {
         if (!hasBlockAt(p.first, p.second)) {
             deleteGhostBlockAt(p.first, p.second);
         }
@@ -208,18 +210,17 @@ void TetrisGameModel::deleteFullLines() {
 }
 
 bool TetrisGameModel::setNextTetromino() {
-    m_curTetromino = 
-        std::make_unique<tetrominoes::Tetromino>(tetrominoes::getRandomTetromino());
+    m_curTetromino = tetrominoes::getRandomTetromino();
     for (int i = 0; i < m_fieldWidth / 2; ++i) {
-        m_curTetromino->moveRightOneSquare();
+        m_curTetromino.moveRightOneSquare();
     }
-    return canMovedDownTetromino(*m_curTetromino.get());
+    return canMovedDownTetromino(m_curTetromino);
 }
 
 bool TetrisGameModel::update() {
-    if (m_curTetromino && canMovedDownTetromino(*m_curTetromino.get())) {
-        m_curTetromino->moveDownOneSquare();
+    if (canMovedDownTetromino(m_curTetromino)) {
         deleteCurTetrominoOnField();
+        m_curTetromino.moveDownOneSquare();
         setCurTetrominoOnField();
     } else {
         deleteFullLines();
