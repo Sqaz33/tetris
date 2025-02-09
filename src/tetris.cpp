@@ -22,7 +22,7 @@ size_t TetrisGameModel::fieldWidth() const noexcept {
     return m_fieldWidth;
 }
 
-size_t TetrisGameModel::fieldHieght() const noexcept {
+size_t TetrisGameModel::fieldHeight() const noexcept {
     return m_fieldHeight;
 }
 
@@ -86,14 +86,13 @@ bool TetrisGameModel::canRotateRightTetromino(const tetrominoes::Tetromino& tetr
     auto tempTetromino = tetromino;
     tempTetromino.rotateRigth();
 
-    bool canRotate = true;
     for (auto& p : tempTetromino.shape()) {
-        canRotate = canRotate && p.first >= 0 && p.first < m_fieldHeight &&
+        bool canRotate = canRotate && p.first >= 0 && p.first < m_fieldHeight &&
                                     p.second >= 0 && p.second < m_fieldWidth &&
                                     (tetromino.containsBlock(p) || !hasBlockAt(p.first, p.second));
-                                
+        if (!canRotate) return false;
     }
-    return canRotate;
+    return true;
 }
 
 bool TetrisGameModel::moveLeftCurTetromino() {

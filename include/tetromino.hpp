@@ -2,6 +2,7 @@
 #define SRC_INCLUDE_TETROMINO_HPP
 
 #include <algorithm>
+#include <cstddef>
 #include <climits>
 #include <initializer_list>
 #include <utility>
@@ -11,8 +12,8 @@ namespace tetrominoes {
 
 using Block = std::pair<int, int>;
 
-enum class TetrominoType {
-    O, I, S, Z, L, J, T
+enum class TetrominoType : std::uint8_t {
+    O = 0, I, S, Z, L, J, T
 };
 
 class Tetromino;

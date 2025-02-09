@@ -18,7 +18,7 @@ public:
     virtual ~IDrawable() { }
 };
 
-class DrawableComposite : public IDrawable {
+class IDrawableComposite : public IDrawable {
 public:
     void pushComponent(std::shared_ptr<IDrawable> comp);
     virtual void draw(sf::RenderWindow& window, sf::Vector2f start) = 0;
@@ -50,7 +50,7 @@ private:
  * @brief
  *
  */
-class DrawableFramedWindow final : public DrawableComposite {
+class DrawableFramedWindow final : public IDrawableComposite {
 public:
     DrawableFramedWindow(sf::RenderWindow& window, float thickness, sf::Color color);
 

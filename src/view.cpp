@@ -33,11 +33,11 @@ void drawHorizontalBlackLine(sf::RenderWindow& window,
 } // namespace 
 
 namespace view {
-void DrawableComposite::pushComponent(std::shared_ptr<IDrawable> comp) {
+void IDrawableComposite::pushComponent(std::shared_ptr<IDrawable> comp) {
     components_.emplace_back(comp);
 }
 
-void DrawableComposite::draw(sf::RenderWindow& window, sf::Vector2f start) {
+void IDrawableComposite::draw(sf::RenderWindow& window, sf::Vector2f start) {
     for (auto comp : components_) {
         comp->draw(window, start);
     }
@@ -91,7 +91,7 @@ void DrawableFramedWindow::drawComponents_(sf::RenderWindow& window, sf::Vector2
         start.x + thickness,
         start.y + thickness
     );
-    DrawableComposite::draw(window, compStart);
+    IDrawableComposite::draw(window, compStart);
 } 
 
 // #######################################
@@ -105,7 +105,7 @@ DrawableTetrisField::DrawableTetrisField(float width,
     , height_(height)
 {   
     auto modelWidth = model_->fieldWidth();
-    auto modelHeight = model_->fieldHieght();
+    auto modelHeight = model_->fieldHeight();
     blockWidth_ = ((width - gridThickness_) - (gridThickness_ * modelWidth)) / modelWidth;
     blockHeight_ = ((height - gridThickness_) - (gridThickness_ * modelHeight)) / modelHeight;
 }
@@ -117,7 +117,7 @@ void DrawableTetrisField::draw(sf::RenderWindow& window, sf::Vector2f start) {
     drawGrid_(window, start);
     
     decltype(auto) field = model_->field(); 
-    for (std::size_t y = 0; y < model_->fieldHieght(); ++y) {
+    for (std::size_t y = 0; y < model_->fieldHeight(); ++y) {
         for (std::size_t x = 0; x < model_->fieldWidth(); ++x) {
             auto block = field[y][x];
             if (block != BlockType::VOID) {

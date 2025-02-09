@@ -25,7 +25,7 @@ public:
 public:
     const TetrisGameField& field() const noexcept;
     size_t fieldWidth() const noexcept;
-    size_t fieldHieght() const noexcept;
+    size_t fieldHeight() const noexcept;
     size_t score() const noexcept;
     const tetrominoes::Tetromino& curTetromino() const;
     const tetrominoes::Tetromino& curTetrominoGhost() const;
@@ -38,7 +38,6 @@ public:
     bool moveLeftCurTetromino();
     bool moveRightCurTetromino();
     
-
 private:
     bool canMovedDownTetromino(const tetrominoes::Tetromino& tetromino) const;
     bool canMovedLeftTetromino(const tetrominoes::Tetromino& tetromino) const;
@@ -47,7 +46,7 @@ private:
  
     bool setNextTetromino();
 
-    void setBlockAt(size_t i, size_t j)  ;
+    void setBlockAt(size_t i, size_t j);
     void deleteBlockAt(size_t i, size_t j);
 
     void setGhostBlockAt(size_t i, size_t j);
