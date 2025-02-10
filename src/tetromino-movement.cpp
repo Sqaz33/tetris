@@ -68,7 +68,6 @@ bool TetrominoMovementWithGhostTetromino::setTetromino(tetrominoes::Tetromino te
     if (!canMoveDownTetromino_(tetromino)) {
         return false;
     }
-    deleteCurTetrominoOnField_();
     curTetromino_ = tetromino;
     setCurTetrominoOnField_();
     updateTetrominoGhost_();
@@ -77,9 +76,9 @@ bool TetrominoMovementWithGhostTetromino::setTetromino(tetrominoes::Tetromino te
 
 bool TetrominoMovementWithGhostTetromino::canMoveDownTetromino_(const tetrominoes::Tetromino& tetromino) const {
     for (const auto& p : tetromino.shape()) {
-        if (p.first < fieldHeight_() - 1  &&
-            fieldHasBlockAt_(p.first + 1, p.second) &&
-            !tetromino.containsBlock({p.first + 1, p.second})) 
+        if (p.second < fieldHeight_() - 1  &&
+            fieldHasBlockAt_(p.first, p.second + 1) &&
+            !tetromino.containsBlock({p.first, p.second + 1})) 
         {
             return false;
         }
@@ -89,9 +88,9 @@ bool TetrominoMovementWithGhostTetromino::canMoveDownTetromino_(const tetrominoe
 
 bool TetrominoMovementWithGhostTetromino::canMoveLeftTetromino_(const tetrominoes::Tetromino& tetromino) const {
     for (const auto& p : tetromino.shape()) {
-        if (p.second > 0  &&
-            fieldHasBlockAt_(p.first, p.second - 1) &&
-            !tetromino.containsBlock({p.first, p.second - 1})) 
+        if (p.first > 0  &&
+            fieldHasBlockAt_(p.first - 1, p.second) &&
+            !tetromino.containsBlock({p.first - 1, p.second})) 
         {
             return false;
         }
@@ -101,9 +100,9 @@ bool TetrominoMovementWithGhostTetromino::canMoveLeftTetromino_(const tetrominoe
 
 bool TetrominoMovementWithGhostTetromino::canMoveRightTetromino_(const tetrominoes::Tetromino& tetromino) const {
     for (const auto& p : tetromino.shape()) {
-        if (p.second < fieldWidth_() - 1 &&
-            fieldHasBlockAt_(p.first, p.second + 1) &&
-            !tetromino.containsBlock({p.first, p.second + 1})) 
+        if (p.first < fieldWidth_() - 1 &&
+            fieldHasBlockAt_(p.first + 1, p.second) &&
+            !tetromino.containsBlock({p.first + 1, p.second})) 
         {
             return false;
         }
@@ -116,8 +115,8 @@ bool TetrominoMovementWithGhostTetromino::canRotateRightTetromino_(const tetromi
     tempTetromino.rotateRigth();
 
     for (auto& p : tempTetromino.shape()) {
-        bool canRotate = p.first >= 0 && p.first < fieldHeight_() &&
-                            p.second >= 0 && p.second < fieldWidth_() &&
+        bool canRotate = p.first >= 0 && p.first < fieldWidth_() - 1 &&
+                            p.second >= 0 && p.second < fieldHeight_() - 1 &&
                             (tetromino.containsBlock(p) || !fieldHasBlockAt_(p.first, p.second));
         if (!canRotate) return false;
     }
@@ -139,11 +138,17 @@ void TetrominoMovementWithGhostTetromino::deleteBlockAt_(std::size_t x, std::siz
 }
 
 void TetrominoMovementWithGhostTetromino::setGhostBlockAt_(std::size_t x, std::size_t y) {
-    setBlockAt_(x, y, tetris_game_model::BlockType::GHOST);
+    decltype(auto) blockAt = field_->operator[](y)[x];
+    if (blockAt == BlockType::VOID) {
+        blockAt = BlockType::GHOST;
+    }
 }
 
 void TetrominoMovementWithGhostTetromino::deleteGhostBlockAt_(std::size_t x, std::size_t y) {
-    deleteBlockAt_(x, y);
+    decltype(auto) blockAt = field_->operator[](y)[x];
+    if (blockAt == BlockType::GHOST) {
+        blockAt = BlockType::VOID;
+    }
 }
 
 void TetrominoMovementWithGhostTetromino::setCurTetrominoOnField_() {
@@ -162,15 +167,13 @@ void TetrominoMovementWithGhostTetromino::deleteCurTetrominoOnField_() {
 
 void TetrominoMovementWithGhostTetromino::setCurTetrominoGhostOnField_() {
     for (auto b : curTetrominoGhost_.shape()) {
-        setBlockAt_(
-            b.first, b.second, BlockType::GHOST);
+        setGhostBlockAt_(b.first, b.second);
     }
 }
 
 void TetrominoMovementWithGhostTetromino::deleteCurTetrominoGhostOnField_() {
     for (auto b : curTetrominoGhost_.shape()) {
-        setBlockAt_(
-            b.first, b.second, BlockType::VOID);
+        deleteGhostBlockAt_(b.first, b.second);
     }
 }
 

@@ -9,10 +9,13 @@
 #include <SFML/Graphics.hpp>
 
 #include "../include/tetromino.hpp"
-#include "../include/tetris.hpp"
+// #include "../include/tetris.hpp"
 #include "../include/view.hpp"
 
-using namespace tetris;
+#include "../include/tetris-game-model.hpp"
+
+// using namespace tetris;
+using namespace tetris_game_model;
 using namespace tetrominoes;
 
 std::mutex mut;
@@ -32,7 +35,7 @@ int main() {
         while (window.isOpen()) {
             {
                 std::lock_guard<std::mutex> lk{mut};
-                isGameRun =  model->update();
+                model->updateModel();
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(200ms));
         }
@@ -54,18 +57,18 @@ int main() {
 
             switch (keyCode) {
                 case Key::Left:
-                    model->moveLeftCurTetromino();
+                    model->moveLeftTetromino();
                     break;
                 case Key::Right:
-                    model->moveRightCurTetromino();
+                    model->moveRightTetromino();
                     break;
                 case Key::Up:
-                    model->rotateRightCurTetromino();
+                    model->rotateRightTetromino();
                     break;
                 case Key::Down:
-                    model->update();
-                    model->update();
-                    model->update();
+                    model->updateModel();
+                    model->updateModel();
+                    model->updateModel();
                     break;
             }
 

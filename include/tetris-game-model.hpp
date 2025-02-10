@@ -17,7 +17,7 @@ enum class BlockType: std::uint8_t {
     L, 
     J, 
     T,
-    VOID = 0,
+    VOID,
     GHOST,
 };
 
@@ -29,9 +29,9 @@ public:
 
 class TetrisGameModel final : public observer_n_subject::Subject {
 public:
-    TetrisGameModel(std::size_t fieldWidth, std::size_t fieldHeight);
+    TetrisGameModel(std::size_t fieldWidth = 21, std::size_t fieldHeight = 41);
 
-    using field_ptr_t = std::shared_ptr<std::vector<std::vector<BlockType>>>;
+    using field_t = std::vector<std::vector<BlockType>>;
     
 public:
     // observer
@@ -44,7 +44,7 @@ public:
 public:
     // game interaction
     void updateModel();
-    const field_ptr_t field() const;
+    const field_t& field() const;
     int score() const;
     std::size_t fieldWidth() const; 
     std::size_t fieldHeight() const;

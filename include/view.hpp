@@ -7,8 +7,11 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
-#include "tetris.hpp"
+// #include "tetris.hpp"
 #include "tetromino.hpp"
+#include "tetris-game-model.hpp"
+
+using namespace tetris_game_model;
 
 namespace view {
 
@@ -73,11 +76,11 @@ public:
     DrawableTetrisField(float width, 
                         float height, 
                         float gridThickness, 
-                        std::shared_ptr<tetris::TetrisGameModel> model);
+                        std::shared_ptr<TetrisGameModel> model);
 
 public:
     void draw(sf::RenderWindow& window, sf::Vector2f start) override;
-    std::shared_ptr<tetris::TetrisGameModel> model();
+    std::shared_ptr<TetrisGameModel> model();
 
 private:
     void drawBlockAt_(std::size_t blockX, 
@@ -92,7 +95,7 @@ private:
     // void eraseCurTetromino_(sf::RenderWindow& window, sf::Vector2f start);
     // void eraseCurTetrominoGhost_(sf::RenderWindow& window, sf::Vector2f start);
 private:    
-    std::shared_ptr<tetris::TetrisGameModel> model_;
+    std::shared_ptr<TetrisGameModel> model_;
     const float gridThickness_;
     float blockWidth_;
     float blockHeight_;

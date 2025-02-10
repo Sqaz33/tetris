@@ -4,6 +4,10 @@
 
 #include <SFML/System/Angle.hpp>
 
+#include "../include/tetris-game-model.hpp"
+
+using namespace tetris_game_model;
+
 namespace {
 
 void drawVerticaBlacklLine(sf::RenderWindow& window, 
@@ -98,7 +102,7 @@ void DrawableFramedWindow::drawComponents_(sf::RenderWindow& window, sf::Vector2
 DrawableTetrisField::DrawableTetrisField(float width, 
                                          float height, 
                                          float gridThickness, 
-                                         std::shared_ptr<tetris::TetrisGameModel> model) : 
+                                         std::shared_ptr<TetrisGameModel> model) : 
     gridThickness_(gridThickness)
     , model_(model)
     , width_(width)
@@ -111,7 +115,7 @@ DrawableTetrisField::DrawableTetrisField(float width,
 }
 
 void DrawableTetrisField::draw(sf::RenderWindow& window, sf::Vector2f start) {
-    using namespace tetris;
+    // using namespace tetris;
     using namespace sf;
     
     drawGrid_(window, start);
@@ -121,7 +125,7 @@ void DrawableTetrisField::draw(sf::RenderWindow& window, sf::Vector2f start) {
         for (std::size_t x = 0; x < model_->fieldWidth(); ++x) {
             auto block = field[y][x];
             if (block != BlockType::VOID) {
-                auto blockColor = block == BlockType::FILLED ? Color::Red : Color::Magenta;
+                auto blockColor = block == BlockType::GHOST ? Color::Magenta : Color::Red;
                 drawBlockAt_(x, y, start, window, blockColor);
             }
         }
@@ -135,7 +139,6 @@ void DrawableTetrisField::drawBlockAt_(std::size_t blockX,
                                        sf::RenderWindow& window,
                                        sf::Color blockColor) 
 {   
-    using namespace tetris;
     float x = start.x 
               + blockX * blockWidth_ 
               + gridThickness_ * (blockX + 1);

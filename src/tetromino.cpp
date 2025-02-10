@@ -47,10 +47,9 @@ int Tetromino::rightmostPointOnX() const {
     return m_rightmostPointOnX;
 }
         
-
 void Tetromino::moveDownOneSquare() noexcept {
     for (auto& p : m_shape) {
-        ++p.first;
+        ++p.second;
     }
     ++m_lowestPointOnY;
     ++m_highestPointOnY;
@@ -58,7 +57,7 @@ void Tetromino::moveDownOneSquare() noexcept {
 
 void Tetromino::moveLeftOneSquare() noexcept {
     for (auto& p : m_shape) {
-        --p.second;
+        --p.first;
     }
     --m_leftmostPointOnX;
     --m_rightmostPointOnX;
@@ -66,7 +65,7 @@ void Tetromino::moveLeftOneSquare() noexcept {
 
 void Tetromino::moveRightOneSquare() noexcept {
     for (auto& p : m_shape) {
-        ++p.second;
+        ++p.first;
     }
     ++m_leftmostPointOnX;
     ++m_rightmostPointOnX;
@@ -85,10 +84,10 @@ void Tetromino::swapShapeAxis() noexcept {
     int x_c = m_leftmostPointOnX, y_c = m_highestPointOnY ;
     int x, y;
     for (auto& p : m_shape) {
-        x = p.second - x_c;
-        y = p.first - y_c;
-        p.second = x_c + y;
-        p.first = y_c + x;
+        x = p.first - x_c;
+        y = p.second - y_c;
+        p.first = x_c + y;
+        p.second = y_c + x;
     }
 }
 
@@ -98,17 +97,17 @@ void Tetromino::setShapeBoundaries() noexcept {
     m_leftmostPointOnX = INT_MAX;
     m_rightmostPointOnX = INT_MIN;
     for (const auto& p : m_shape) {
-        m_lowestPointOnY = std::max(m_lowestPointOnY, p.first);
-        m_highestPointOnY = std::min(m_highestPointOnY, p.first);
+        m_lowestPointOnY = std::max(m_lowestPointOnY, p.second);
+        m_highestPointOnY = std::min(m_highestPointOnY, p.second);
 
-        m_leftmostPointOnX = std::min(m_leftmostPointOnX, p.second);
-        m_rightmostPointOnX = std::max(m_rightmostPointOnX, p.second);
+        m_leftmostPointOnX = std::min(m_leftmostPointOnX, p.first);
+        m_rightmostPointOnX = std::max(m_rightmostPointOnX, p.first);
     }   
 }
 
 void Tetromino::reflectShape() noexcept {
     for (auto& p : m_shape) {
-        p.second = m_rightmostPointOnX + m_leftmostPointOnX - p.second ;
+        p.first = m_rightmostPointOnX + m_leftmostPointOnX - p.first ;
     }
 }
 
