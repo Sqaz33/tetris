@@ -85,11 +85,10 @@ bool TetrisGameModel::canMovedRightTetromino(const tetrominoes::Tetromino& tetro
 bool TetrisGameModel::canRotateRightTetromino(const tetrominoes::Tetromino& tetromino) const {
     auto tempTetromino = tetromino;
     tempTetromino.rotateRigth();
-
     for (auto& p : tempTetromino.shape()) {
-        bool canRotate = canRotate && p.first >= 0 && p.first < m_fieldHeight &&
-                                    p.second >= 0 && p.second < m_fieldWidth &&
-                                    (tetromino.containsBlock(p) || !hasBlockAt(p.first, p.second));
+        bool canRotate = p.first >= 0 && p.first < m_fieldHeight &&
+                        p.second >= 0 && p.second < m_fieldWidth &&
+                        (tetromino.containsBlock(p) || !hasBlockAt(p.first, p.second));
         if (!canRotate) return false;
     }
     return true;
@@ -192,7 +191,7 @@ void TetrisGameModel::lowerAllLinesUnder(size_t start) {
 
 void TetrisGameModel::deleteFullLines() {
     for (int i = m_fieldHeight - 1; i >= 0; --i) {
-        if (
+        while (
             std::find_if(
                 m_field[i].begin(), m_field[i].end(), 
                 [](BlockType x){return x == BlockType::VOID || x == BlockType::GHOST;}

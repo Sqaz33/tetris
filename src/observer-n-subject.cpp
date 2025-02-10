@@ -1,4 +1,4 @@
-#include <../include/observer-n-subject.hpp>
+#include "../include/observer-n-subject.hpp"
 
 #include <algorithm>
 
@@ -9,9 +9,9 @@ void Subject::attach(std::shared_ptr<Observer> observer, EventType event) {
 }
 
 void Subject::detach(std::shared_ptr<Observer> observer) {
-    std::erase(
+    std::erase_if(
         observers_,
-        [observer](const auto& p) {
+        [observer](auto& p) {
             return p.first.lock() == observer;
         }
     );
@@ -21,8 +21,9 @@ void Subject::notify(EventType event) {
     for (auto it = observers_.begin(); it != observers_.end();) {
         auto wptr = it->first;
         auto curEvent = it->second;
-        if (auto obs = wptr.lock() && curEvent == event) {
-            obs->update(this, event);
+        auto obs = wptr.lock();
+        if (obs && curEvent == event) {
+            obs->update(*this, event);
             ++it;
         } else if (!obs) {
             observers_.erase(it);

@@ -23,6 +23,7 @@ enum class BlockType: std::uint8_t {
 
 class TetrisGameModelImpl__;
 class TetrisGameModelImplDeleter {
+public:
     void operator()(TetrisGameModelImpl__* ptr);
 };
 

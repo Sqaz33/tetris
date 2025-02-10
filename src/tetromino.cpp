@@ -188,6 +188,7 @@ Tetromino getRandomTetromino() {
     std::random_device rd;
     std::mt19937 gen(rd()); 
     std::uniform_int_distribution<> distrib(0, 6);
+    return create_I_shape();
     int r = distrib(gen);
     switch (r) {
         case 0: 

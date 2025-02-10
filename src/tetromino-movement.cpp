@@ -14,10 +14,6 @@ namespace {
 namespace tetromino_movement {
 
 // ##################################################
-// TetrominoMovement
-
-
-// ##################################################
 // TetrominoMovementWithGhostTetromino
 void TetrominoMovementWithGhostTetromino::setField(
     std::shared_ptr<std::vector<std::vector<tetris_game_model::BlockType>>> field) {
@@ -116,13 +112,13 @@ bool TetrominoMovementWithGhostTetromino::canMoveRightTetromino_(const tetromino
 }
 
 bool TetrominoMovementWithGhostTetromino::canRotateRightTetromino_(const tetrominoes::Tetromino& tetromino) const {
-   auto tempTetromino = tetromino;
+    auto tempTetromino = tetromino;
     tempTetromino.rotateRigth();
 
     for (auto& p : tempTetromino.shape()) {
-        bool canRotate = canRotate && p.first >= 0 && p.first < fieldHeight_() &&
-                                    p.second >= 0 && p.second < fieldWidth_() &&
-                                    (tetromino.containsBlock(p) || !fieldHasBlockAt_(p.first, p.second));
+        bool canRotate = p.first >= 0 && p.first < fieldHeight_() &&
+                            p.second >= 0 && p.second < fieldWidth_() &&
+                            (tetromino.containsBlock(p) || !fieldHasBlockAt_(p.first, p.second));
         if (!canRotate) return false;
     }
     return true;
