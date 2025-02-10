@@ -13,15 +13,15 @@ namespace tetromino_movement {
 
 class TetrominoMovement {
 public:
-    TetrominoMovement(
+    virtual void setField(
         std::shared_ptr<std::vector<std::vector<tetris_game_model::BlockType>>> field
-    );
+    ) = 0;
 
     virtual bool rotateRight() = 0;
     virtual bool moveDown() = 0;
     virtual bool moveLeft() = 0;
     virtual bool moveRight() = 0;
-    virtual void setTetromino(tetrominoes::Tetromino tetromino) = 0;
+    virtual bool setTetromino(tetrominoes::Tetromino tetromino) = 0;
 
     virtual ~TetrominoMovement() { }
 
@@ -30,16 +30,16 @@ protected:
     tetrominoes::Tetromino curTetromino_;
 };
 
-class TetrominoMovementWithGhostTetromino : public TetrominoMovement {
+class TetrominoMovementWithGhostTetromino final : public TetrominoMovement {
 public:
-    TetrominoMovementWithGhostTetromino (
+    void setField(
         std::shared_ptr<std::vector<std::vector<tetris_game_model::BlockType>>> field
-    );
+    ) override;
     bool rotateRight() override;
     bool moveDown() override;
     bool moveLeft() override;
     bool moveRight() override;
-    void setTetromino(tetrominoes::Tetromino tetromino) override;
+    bool setTetromino(tetrominoes::Tetromino tetromino) override;
 
 private:
     bool canMoveDownTetromino_(const tetrominoes::Tetromino& tetromino) const;
@@ -67,6 +67,7 @@ private:
 
 private:
     tetrominoes::Tetromino curTetrominoGhost_;
+
 };
 
 } // namespace tetromino_movement 

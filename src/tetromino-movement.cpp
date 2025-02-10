@@ -15,14 +15,15 @@ namespace tetromino_movement {
 
 // ##################################################
 // TetrominoMovement
-TetrominoMovement::TetrominoMovement(
-    std::shared_ptr<std::vector<std::vector<tetris_game_model::BlockType>>> field
-) :
-    field_(field)
-{}
+
 
 // ##################################################
 // TetrominoMovementWithGhostTetromino
+void TetrominoMovementWithGhostTetromino::setField(
+    std::shared_ptr<std::vector<std::vector<tetris_game_model::BlockType>>> field) {
+    field_ = field;
+}
+
 bool TetrominoMovementWithGhostTetromino::moveDown() {
     if (!canMoveDownTetromino_(curTetromino_)) {
         return false;
@@ -31,6 +32,7 @@ bool TetrominoMovementWithGhostTetromino::moveDown() {
     curTetromino_.moveDownOneSquare();
     setCurTetrominoOnField_();
     updateTetrominoGhost_();
+    return true;
 }
 
 bool TetrominoMovementWithGhostTetromino::moveLeft() {
@@ -41,6 +43,7 @@ bool TetrominoMovementWithGhostTetromino::moveLeft() {
     curTetromino_.moveLeftOneSquare();
     setCurTetrominoOnField_();
     updateTetrominoGhost_();
+    return true;
 }
 
 bool TetrominoMovementWithGhostTetromino::moveRight() {
@@ -51,6 +54,7 @@ bool TetrominoMovementWithGhostTetromino::moveRight() {
     curTetromino_.moveRightOneSquare();
     setCurTetrominoOnField_();
     updateTetrominoGhost_();
+    return true;
 }
 
 bool TetrominoMovementWithGhostTetromino::rotateRight() {
@@ -61,13 +65,18 @@ bool TetrominoMovementWithGhostTetromino::rotateRight() {
     curTetromino_.rotateRigth();
     setCurTetrominoOnField_();
     updateTetrominoGhost_();
+    return true;
 }
 
-void TetrominoMovementWithGhostTetromino::setTetromino(tetrominoes::Tetromino tetromino) {
+bool TetrominoMovementWithGhostTetromino::setTetromino(tetrominoes::Tetromino tetromino) {
+    if (!canMoveDownTetromino_(tetromino)) {
+        return false;
+    }
     deleteCurTetrominoOnField_();
     curTetromino_ = tetromino;
     setCurTetrominoOnField_();
     updateTetrominoGhost_();
+    return true;
 }
 
 bool TetrominoMovementWithGhostTetromino::canMoveDownTetromino_(const tetrominoes::Tetromino& tetromino) const {

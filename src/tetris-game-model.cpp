@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "../include/tetromino-movement.hpp"
+#include "../include/score-strategy.hpp"
 
 using observer_n_subject::Observer;
 using observer_n_subject::Subject;
@@ -16,7 +17,8 @@ class TetrisGameModelImpl__ : public observer_n_subject::Subject {
 public:
     TetrisGameModelImpl__(
         std::size_t fieldWidth, std::size_t fieldHeight,
-        std::unique_ptr<tetromino_movement::TetrominoMovement> movement);
+        std::unique_ptr<tetromino_movement::TetrominoMovement> movement,
+        std::unique_ptr<score_strategy::ScoreStrategy> scoreStrategy);
 
     using field_ptr_t = std::shared_ptr<std::vector<std::vector<BlockType>>>;
 
@@ -50,18 +52,22 @@ private:
     field_ptr_t field_;
     int score_;
     std::unique_ptr<tetromino_movement::TetrominoMovement> movement_;
+    std::unique_ptr<score_strategy::ScoreStrategy> scoreStrategy_;
 };
 
 
 // definitions
 TetrisGameModelImpl__::TetrisGameModelImpl__(
     std::size_t fieldWidth, std::size_t fieldHeight,
-    std::unique_ptr<tetromino_movement::TetrominoMovement> movement) {
+    std::unique_ptr<tetromino_movement::TetrominoMovement> movement,
+    std::unique_ptr<score_strategy::ScoreStrategy> scoreStrategy) {
     movement_ = std::move(movement);
+    scoreStrategy_ = std::move(scoreStrategy);
     field_ = std::make_shared<std::vector<std::vector<BlockType>>>(
         fieldHeight, std::vector<BlockType>(fieldWidth, BlockType::VOID));
 }
 
+// observer defs
 void TetrisGameModelImpl__::attach(
     std::shared_ptr<observer_n_subject::Observer> observer, 
     observer_n_subject::EventType event) {
@@ -77,7 +83,9 @@ void TetrisGameModelImpl__::notify(observer_n_subject::EventType event) {
 }
 
 void TetrisGameModelImpl__::updateModel() {
+    if (movement_->moveDown()) {
 
+    }
 }
 
 const TetrisGameModelImpl__::field_ptr_t TetrisGameModelImpl__::field() const {
@@ -96,6 +104,19 @@ std::size_t TetrisGameModelImpl__::fieldHeight() const {
 }
 
 
+void TetrisGameModelImpl__::fireFieldUpdate_() {
+    notify(observer_n_subject::EventType::GAME_FIELD_UPDATE);
+}
+
+void TetrisGameModelImpl__::fireScoreUpdate_() {
+    notify(observer_n_subject::EventType::GAME_SCORE_UPDATE);
+}
+
+void TetrisGameModelImpl__::fireGameFinish_() {
+    notify(observer_n_subject::EventType::GAME_FINISH);
+}
+
+
 // ##################################################
 // TetrisGameModelImplDeleter
 void TetrisGameModelImplDeleter::operator()(TetrisGameModelImpl__* ptr) {
@@ -106,7 +127,12 @@ void TetrisGameModelImplDeleter::operator()(TetrisGameModelImpl__* ptr) {
 // ##################################################
 // TetrisGameModel
 TetrisGameModel::TetrisGameModel(std::size_t fieldWidth, std::size_t fieldHeight) 
-    : impl_(new TetrisGameModelImpl__(fieldWidth, fieldHeight))
+    : impl_(new TetrisGameModelImpl__(
+        fieldWidth, fieldHeight,
+        std::unique_ptr(new tetromino_movement::TetrominoMovementWithGhostTetromino()),
+        std::unique_ptr
+        new score_strategy::DoubleScorePerLineStrategy()
+    ))
 {}
 
 void TetrisGameModel::attach(std::shared_ptr<Observer> observer, EventType event) {
