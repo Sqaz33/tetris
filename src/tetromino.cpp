@@ -9,18 +9,18 @@
 namespace tetrominoes {
 
 Tetromino::Tetromino(std::initializer_list<Block> shape, TetrominoType type) :
-    m_shape(shape)
-    , m_greatestSide(INT_MIN)
+    shape_(shape)
+    , greatestSide_(INT_MIN)
     , type_(type)
 {
     for (const auto& p : shape) {
-        m_greatestSide = std::max(m_greatestSide, std::max(p.first + 1, p.second + 1));    
+        greatestSide_ = std::max(greatestSide_, std::max(p.first + 1, p.second + 1));    
     }
     setShapeBoundaries();
 }
 
 const std::vector<Block>& Tetromino::shape() const noexcept {
-    return m_shape;
+    return shape_;
 }
 
 TetrominoType Tetromino::type() const {
@@ -28,51 +28,51 @@ TetrominoType Tetromino::type() const {
 }
 
 int Tetromino::greatestSide() const {
-    return m_greatestSide;
+    return greatestSide_;
 }
 
 int Tetromino::lowestPointOnY() const {
-    return m_lowestPointOnY;
+    return lowestPointOnY_;
 }
 
 int Tetromino::highestPointOnY() const {
-    return m_highestPointOnY;
+    return highestPointOnY_;
 }
 
 int Tetromino::leftmostPointOnX() const {
-    return m_leftmostPointOnX;
+    return leftmostPointOnX_;
 }
 
 int Tetromino::rightmostPointOnX() const {
-    return m_rightmostPointOnX;
+    return rightmostPointOnX_;
 }
         
 void Tetromino::moveDownOneSquare() noexcept {
-    for (auto& p : m_shape) {
+    for (auto& p : shape_) {
         ++p.second;
     }
-    ++m_lowestPointOnY;
-    ++m_highestPointOnY;
+    ++lowestPointOnY_;
+    ++highestPointOnY_;
 }
 
 void Tetromino::moveLeftOneSquare() noexcept {
-    for (auto& p : m_shape) {
+    for (auto& p : shape_) {
         --p.first;
     }
-    --m_leftmostPointOnX;
-    --m_rightmostPointOnX;
+    --leftmostPointOnX_;
+    --rightmostPointOnX_;
 }
 
 void Tetromino::moveRightOneSquare() noexcept {
-    for (auto& p : m_shape) {
+    for (auto& p : shape_) {
         ++p.first;
     }
-    ++m_leftmostPointOnX;
-    ++m_rightmostPointOnX;
+    ++leftmostPointOnX_;
+    ++rightmostPointOnX_;
 }
 
 bool Tetromino::containsBlock(Block block) const noexcept {
-    for (const auto& p : m_shape) {
+    for (const auto& p : shape_) {
         if (block == p) {
             return true;
         }
@@ -81,9 +81,9 @@ bool Tetromino::containsBlock(Block block) const noexcept {
 }
 
 void Tetromino::swapShapeAxis() noexcept {
-    int x_c = m_leftmostPointOnX, y_c = m_highestPointOnY ;
+    int x_c = leftmostPointOnX_, y_c = highestPointOnY_ ;
     int x, y;
-    for (auto& p : m_shape) {
+    for (auto& p : shape_) {
         x = p.first - x_c;
         y = p.second - y_c;
         p.first = x_c + y;
@@ -92,22 +92,22 @@ void Tetromino::swapShapeAxis() noexcept {
 }
 
 void Tetromino::setShapeBoundaries() noexcept {  
-    m_lowestPointOnY = INT_MIN;
-    m_highestPointOnY = INT_MAX;
-    m_leftmostPointOnX = INT_MAX;
-    m_rightmostPointOnX = INT_MIN;
-    for (const auto& p : m_shape) {
-        m_lowestPointOnY = std::max(m_lowestPointOnY, p.second);
-        m_highestPointOnY = std::min(m_highestPointOnY, p.second);
+    lowestPointOnY_ = INT_MIN;
+    highestPointOnY_ = INT_MAX;
+    leftmostPointOnX_ = INT_MAX;
+    rightmostPointOnX_ = INT_MIN;
+    for (const auto& p : shape_) {
+        lowestPointOnY_ = std::max(lowestPointOnY_, p.second);
+        highestPointOnY_ = std::min(highestPointOnY_, p.second);
 
-        m_leftmostPointOnX = std::min(m_leftmostPointOnX, p.first);
-        m_rightmostPointOnX = std::max(m_rightmostPointOnX, p.first);
+        leftmostPointOnX_ = std::min(leftmostPointOnX_, p.first);
+        rightmostPointOnX_ = std::max(rightmostPointOnX_, p.first);
     }   
 }
 
 void Tetromino::reflectShape() noexcept {
-    for (auto& p : m_shape) {
-        p.first = m_rightmostPointOnX + m_leftmostPointOnX - p.first ;
+    for (auto& p : shape_) {
+        p.first = rightmostPointOnX_ + leftmostPointOnX_ - p.first ;
     }
 }
 

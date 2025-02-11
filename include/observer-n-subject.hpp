@@ -8,10 +8,19 @@
 
 namespace observer_n_subject {
 
+// TODO: 
+// идея: подписочный сервис, Observer - чисто логический. Тип ивента - класс-тег.
+// в сервисе, можно будет регистрироваться 
+// Subjectам и Наблюдателям (+ указывать тип подписки/рассылки в виде тега)
 enum class EventType: std::int8_t { 
     GAME_FIELD_UPDATE = 0,
     GAME_SCORE_UPDATE,
-    GAME_FINISH
+    GAME_FINISH,
+    USER_ASKED_LEFT,
+    USER_ASKED_RIGHT,
+    USER_ASKED_DOWN,
+    USER_ASKED_ROTATE_RIGHT,
+    USER_ASKED_CLOSE_GAME
 };
 
 class Subject;

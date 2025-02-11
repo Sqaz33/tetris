@@ -49,12 +49,12 @@ private:
     void setShapeBoundaries() noexcept;
 
 private:
-    std::vector<Block> m_shape ;
-    int m_greatestSide;
-    int m_lowestPointOnY;
-    int m_leftmostPointOnX;
-    int m_rightmostPointOnX;
-    int m_highestPointOnY;
+    std::vector<Block> shape_ ;
+    int greatestSide_;
+    int lowestPointOnY_;
+    int leftmostPointOnX_;
+    int rightmostPointOnX_;
+    int highestPointOnY_;
     TetrominoType type_;
 };
 
