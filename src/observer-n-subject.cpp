@@ -22,9 +22,9 @@ void Subject::notify(EventType event) {
         auto wptr = it->first;
         auto curEvent = it->second;
         auto obs = wptr.lock();
+        if (obs) ++it;
         if (obs && curEvent == event) {
             obs->update(*this, event);
-            ++it;
         } else if (!obs) {
             observers_.erase(it);
         }

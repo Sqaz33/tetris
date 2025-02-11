@@ -1,3 +1,6 @@
+
+#if 0
+
 #include <thread>
 #include <chrono>
 #include <memory>
@@ -91,4 +94,58 @@ int main() {
 
     t2.join();
 
+}
+
+#endif
+
+#include <atomic>
+#include <chrono>
+#include <memory>
+#include <mutex>
+#include <thread>
+
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+
+#include "../include/player-input.hpp"
+#include "../include/tetris-game-controller.hpp"
+#include "../include/tetris-game-model.hpp"
+#include "../include/view.hpp"
+
+int main() {
+    using namespace std::chrono_literals;
+    auto window = std::make_shared<sf::RenderWindow>(sf::VideoMode({550, 1050}), "Tetris");
+    auto comp = std::make_shared<view::DrawableFramedWindow>(*window, 10, sf::Color::White);
+
+    auto model = std::make_shared<TetrisGameModel>();
+    auto drawableField = std::make_shared<view::DrawableTetrisField>(530.f, 1030.f, 5.f, model); 
+
+    auto input = std::make_shared<player_input::KeyBoardInput>(window);
+
+    comp->pushComponent(drawableField);
+
+    auto controller 
+        = std::make_shared<tetris_game_controller::TetrisGameController>(model, input, window, comp);
+    controller->registerAsObserver();
+
+    std::atomic_bool isGameRun = true;
+    std::mutex modelMut;
+
+    auto modelUpdater = [&] {
+        while (isGameRun) {
+            {
+                std::lock_guard<std::mutex> lk{modelMut};
+                model->updateModel();
+            }
+            std::this_thread::sleep_for(200ms);
+        };
+    };
+
+    std::thread t1(modelUpdater);
+    model->updateModel();
+
+
+    controller->runModel(modelMut, isGameRun);
+
+    t1.join();
 }

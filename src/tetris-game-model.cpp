@@ -103,14 +103,13 @@ void TetrisGameModelImpl__::notify(observer_n_subject::EventType event) {
 
 void TetrisGameModelImpl__::updateModel() {
     if (movementImpl_->moveDown()) {
-        fireFieldUpdate_();
     } else {
         deleteFullLinesNUpdateScore_();
-        fireFieldUpdate_();
         if (!setNextTetromino_())  {
             fireGameFinish_();
         }
     }
+    fireFieldUpdate_();
 }
 
 bool TetrisGameModelImpl__::rotateRightTetromino() {
@@ -160,7 +159,7 @@ void TetrisGameModelImpl__::fireGameFinish_() {
 }
 
 int TetrisGameModelImpl__::deleteFullLines_() {
-    decltype(auto) f = *field_.get();
+    decltype(auto) f = *field_;
 
     auto isEmptyBlock = [] (auto b) {
         return b == BlockType::VOID || b == BlockType::GHOST;
@@ -179,9 +178,9 @@ int TetrisGameModelImpl__::deleteFullLines_() {
 }
 
 void TetrisGameModelImpl__::deleteFullLinesNUpdateScore_() {
-    auto curScore = score_;
-    score_ = deleteFullLines_();
-    if (curScore != score_) fireScoreUpdate_();
+    auto plusScore = scoreStrategy_->computeScore(score_, deleteFullLines_());
+    score_ += plusScore;
+    if (plusScore != 0) fireScoreUpdate_();
 }
 
 bool TetrisGameModelImpl__::setNextTetromino_() {
@@ -207,7 +206,7 @@ TetrisGameModel::TetrisGameModel(std::size_t fieldWidth, std::size_t fieldHeight
         std::unique_ptr<tetromino_movement::TetrominoMovementWithGhostTetromino>(
             new tetromino_movement::TetrominoMovementWithGhostTetromino()),
         std::unique_ptr<score_strategy::ScoreStrategy>(
-            new score_strategy::DoubleScorePerLineStrategy())
+            new score_strategy::SquareLineScoreStrategy())
     ))
 {}
 
@@ -223,7 +222,7 @@ void TetrisGameModel::detach(std::shared_ptr<Observer> observer) {
 void TetrisGameModel::notify(EventType event) { }
 
 const TetrisGameModel::field_t& TetrisGameModel::field() const {
-    return *(impl_->field().get());
+    return *(impl_->field());
 }
 
 void TetrisGameModel::updateModel() {

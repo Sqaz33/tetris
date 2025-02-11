@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <iostream>
+#include <chrono>
 
 namespace tetris_game_controller {
 
@@ -14,7 +15,9 @@ TetrisGameController::TetrisGameController(
     , playerInput_(playerInput)
     , window_(window)
     , view_(view)
-{   
+{}
+
+void TetrisGameController::registerAsObserver() {
     using namespace observer_n_subject;
 
     gameModel_->attach(getThis(), EventType::GAME_FIELD_UPDATE);
@@ -39,9 +42,10 @@ std::shared_ptr<TetrisGameController> TetrisGameController::getThis() {
 void TetrisGameController::gameLoop_(std::mutex& modelMut, std::atomic_bool& isGameRun) {
     observer_n_subject::EventType event;
     while (isGameRun) {
-        playerInput_->pollInput();
-        while (!eventQueue_.tryPop(event)) 
-            std::this_thread::yield;
+        while (!eventQueue_.tryPop(event)) {
+            playerInput_->pollInput();
+            std::this_thread::yield();
+        }
         handleEvent_(modelMut, isGameRun, event);
     }
 }
@@ -52,7 +56,9 @@ void TetrisGameController::handleEvent_(
     switch (event) {
         case EventType::GAME_FIELD_UPDATE: {
             std::lock_guard<std::mutex> lk{modelMut};
-            view_->draw(*window_.get(), {0, 0});
+            window_->clear();
+            view_->draw(*window_, {0, 0});
+            window_->display();
             break;
         } 
         case EventType::GAME_SCORE_UPDATE: {

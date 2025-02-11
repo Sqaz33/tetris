@@ -1,6 +1,9 @@
 #ifndef PLAYER_INPUT_HPP
 #define PLAYER_INPUT_HPP
 
+#include <memory>
+
+#include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
 #include "observer-n-subject.hpp"

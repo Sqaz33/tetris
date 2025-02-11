@@ -1,3 +1,5 @@
+# if 0
+
 #include "../include/tetris.hpp"
 
 #include <cmath>
@@ -230,3 +232,5 @@ bool TetrisGameModel::update() {
 }
 
 } // namespace tetris
+
+#endif

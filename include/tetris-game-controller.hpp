@@ -17,25 +17,28 @@
 namespace tetris_game_controller {
 
 class TetrisGameController : public observer_n_subject::Observer,  
-                             protected std::enable_shared_from_this<TetrisGameController> {
+                             public std::enable_shared_from_this<TetrisGameController> {
 public:
     TetrisGameController(
         std::shared_ptr<tetris_game_model::TetrisGameModel> gameModel,
-        std::shared_ptr<player_input::IPlayerInput> playerInput_,
+        std::shared_ptr<player_input::IPlayerInput> playerInput,
         std::shared_ptr<sf::RenderWindow> window,
         std::shared_ptr<view::IDrawable> view);
 
+    void registerAsObserver();
     void runModel(std::mutex& modelMut, std::atomic_bool& isGameRun);
     std::shared_ptr<TetrisGameController> getThis();
-
+    
 private:
     void gameLoop_(std::mutex& modelMut, std::atomic_bool& isGameRun);
     void handleEvent_(
         std::mutex& modelMut, std::atomic_bool& isGameRun, observer_n_subject::EventType event);
+
 //observer
 public:
     void update(
         observer_n_subject::Subject& subject, observer_n_subject::EventType event) override;
+        
 private:
     std::shared_ptr<tetris_game_model::TetrisGameModel> gameModel_;
     std::shared_ptr<player_input::IPlayerInput> playerInput_;

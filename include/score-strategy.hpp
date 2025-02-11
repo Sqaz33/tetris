@@ -9,7 +9,7 @@ public:
     virtual ~ScoreStrategy() {}
 };
 
-class DoubleScorePerLineStrategy : public ScoreStrategy {
+class SquareLineScoreStrategy : public ScoreStrategy {
 public:
     int computeScore(int preScore, int linesDestroyed) override;
 };

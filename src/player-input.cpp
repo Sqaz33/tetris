@@ -73,4 +73,4 @@ void KeyBoardInput::fireUserAskedCloseGame_() {
     notify(observer_n_subject::EventType::USER_ASKED_CLOSE_GAME);
 }
 
-}
+} // namespace player_input
