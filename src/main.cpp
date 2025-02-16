@@ -129,6 +129,7 @@ int main() {
     controller->registerAsObserver();
 
     std::atomic_bool isGameRun = true;
+    std::atomic_bool isGamePause = false;
     std::mutex modelMut;
 
     auto modelUpdater = [&] {
@@ -138,6 +139,9 @@ int main() {
                 model->updateModel();
             }
             std::this_thread::sleep_for(200ms);
+
+            while (isGamePause && isGameRun)
+                std::this_thread::yield(); 
         };
     };
 
@@ -145,7 +149,7 @@ int main() {
     model->updateModel();
 
 
-    controller->runModel(modelMut, isGameRun);
+    controller->runModel(modelMut, isGameRun, isGamePause);
 
     t1.join();
 }

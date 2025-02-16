@@ -36,21 +36,11 @@ void KeyBoardInput::pollInput() {
                 fireUserAskedDown_();
                 fireUserAskedDown_();
                 break;
+            case Key::Tab:
+                fireUserAskedPauseGame_();
+                break;
         }
     }
-}
-
-void KeyBoardInput::attach(
-    std::shared_ptr<observer_n_subject::Observer> observer, observer_n_subject::EventType event) {
-    observer_n_subject::Subject::attach(observer, event);
-}
-
-void KeyBoardInput::detach(std::shared_ptr<observer_n_subject::Observer> observer) {
-    observer_n_subject::Subject::detach(observer);
-}
-
-void KeyBoardInput::notify(observer_n_subject::EventType event) {
-    observer_n_subject::Subject::notify(event);
 }
 
 void KeyBoardInput::fireUserAskedLeft_() {
@@ -72,5 +62,10 @@ void KeyBoardInput::fireUserAskedRotateRight_() {
 void KeyBoardInput::fireUserAskedCloseGame_() {
     notify(observer_n_subject::EventType::USER_ASKED_CLOSE_GAME);
 }
+
+void KeyBoardInput::fireUserAskedPauseGame_() {
+    notify(observer_n_subject::EventType::USER_ASKED_PAUSE_GAME);
+}
+
 
 } // namespace player_input

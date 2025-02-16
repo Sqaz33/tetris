@@ -16,7 +16,7 @@
 
 namespace tetris_game_controller {
 
-class TetrisGameController : public observer_n_subject::Observer,  
+class TetrisGameController : public observer_n_subject::IObserver,  
                              public std::enable_shared_from_this<TetrisGameController> {
 public:
     TetrisGameController(
@@ -26,18 +26,19 @@ public:
         std::shared_ptr<view::IDrawable> view);
 
     void registerAsObserver();
-    void runModel(std::mutex& modelMut, std::atomic_bool& isGameRun);
+    void runModel(std::mutex& modelMut, std::atomic_bool& isGameRun, std::atomic_bool& isGamePause);
     std::shared_ptr<TetrisGameController> getThis();
     
 private:
-    void gameLoop_(std::mutex& modelMut, std::atomic_bool& isGameRun);
+    void gameLoop_(std::mutex& modelMut, std::atomic_bool& isGameRun, std::atomic_bool& isGamePause);
     void handleEvent_(
-        std::mutex& modelMut, std::atomic_bool& isGameRun, observer_n_subject::EventType event);
+        std::mutex& modelMut, std::atomic_bool& isGameRun, 
+        std::atomic_bool& isGamePause,  observer_n_subject::EventType event);
 
 //observer
 public:
     void update(
-        observer_n_subject::Subject& subject, observer_n_subject::EventType event) override;
+        observer_n_subject::ISubject& subject, observer_n_subject::EventType event) override;
         
 private:
     std::shared_ptr<tetris_game_model::TetrisGameModel> gameModel_;

@@ -7,17 +7,16 @@
 #include <initializer_list>
 #include <utility>
 #include <vector>
+#include <cstdint>
 
 namespace tetrominoes {
 
 using Block = std::pair<int, int>;
 
+enum class TetrominoType : std::uint8_t;
 enum class TetrominoType : std::uint8_t {
     O = 0, I, S, Z, L, J, T
 };
-
-class Tetromino;
-Tetromino getRandomTetromino();
 
 class Tetromino {
 public:
@@ -43,10 +42,9 @@ public:
     bool containsBlock(Block block) const noexcept;
 
 private:
-    void swapShapeAxis() noexcept;
-    void reflectShape() noexcept;
-
-    void setShapeBoundaries() noexcept;
+    void swapShapeAxis_() noexcept;
+    void reflectShape_() noexcept;
+    void setShapeBoundaries_() noexcept;
 
 private:
     std::vector<Block> shape_ ;
@@ -65,6 +63,7 @@ Tetromino create_Z_shape();
 Tetromino create_L_shape();
 Tetromino create_J_shape();
 Tetromino create_T_shape();
+Tetromino getRandomTetromino();
  
 } // namespace tetrominoes
 

@@ -5,7 +5,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 project(tetris)
 
-set(CMAKE_PREFIX_PATH "C:/SFML-3.0.0")
+if (UNIX) 
+    set(CMAKE_PREFIX_PATH "/mnt/d/sfml3ub")
+else()
+    set(CMAKE_PREFIX_PATH "C:/SFML-3.0.0")
+endif()
+
 find_package(SFML 3 REQUIRED COMPONENTS Graphics Window)
 
 file(GLOB_RECURSE INCLUDE "include/*.hpp")

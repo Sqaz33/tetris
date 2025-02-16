@@ -4,11 +4,11 @@
 
 namespace observer_n_subject {
 
-void Subject::attach(std::shared_ptr<Observer> observer, EventType event) {
+void SubjectImpl::attach(std::shared_ptr<IObserver> observer, EventType event) {
     observers_.push_back({observer, event});
 }
 
-void Subject::detach(std::shared_ptr<Observer> observer) {
+void SubjectImpl::detach(std::shared_ptr<IObserver> observer) {
     std::erase_if(
         observers_,
         [observer](auto& p) {
@@ -17,7 +17,7 @@ void Subject::detach(std::shared_ptr<Observer> observer) {
     );
 }
 
-void Subject::notify(EventType event) {
+void SubjectImpl::notify(EventType event) {
     for (auto it = observers_.begin(); it != observers_.end();) {
         auto wptr = it->first;
         auto curEvent = it->second;

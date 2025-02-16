@@ -29,29 +29,31 @@ void TetrisGameController::registerAsObserver() {
     playerInput_->attach(getThis(), EventType::USER_ASKED_DOWN);
     playerInput_->attach(getThis(), EventType::USER_ASKED_ROTATE_RIGHT);
     playerInput_->attach(getThis(), EventType::USER_ASKED_CLOSE_GAME);
+    playerInput_->attach(getThis(), EventType::USER_ASKED_PAUSE_GAME);
 }
 
-void TetrisGameController::runModel(std::mutex& modelMut, std::atomic_bool& isGameRun) {
-    gameLoop_(modelMut, isGameRun);
+void TetrisGameController::runModel(std::mutex& modelMut, std::atomic_bool& isGameRun, std::atomic_bool& isGamePause) {
+    gameLoop_(modelMut, isGameRun, isGamePause);
 } 
 
 std::shared_ptr<TetrisGameController> TetrisGameController::getThis() {
     return shared_from_this();
 }
 
-void TetrisGameController::gameLoop_(std::mutex& modelMut, std::atomic_bool& isGameRun) {
+void TetrisGameController::gameLoop_(std::mutex& modelMut, std::atomic_bool& isGameRun, std::atomic_bool& isGamePause) {
     observer_n_subject::EventType event;
     while (isGameRun) {
         while (!eventQueue_.tryPop(event)) {
             playerInput_->pollInput();
             std::this_thread::yield();
         }
-        handleEvent_(modelMut, isGameRun, event);
+        handleEvent_(modelMut, isGameRun, isGamePause, event);
     }
 }
 
 void TetrisGameController::handleEvent_(
-    std::mutex& modelMut, std::atomic_bool& isGameRun, observer_n_subject::EventType event) {
+    std::mutex& modelMut, std::atomic_bool& isGameRun, 
+    std::atomic_bool& isGamePause, observer_n_subject::EventType event) {
     using namespace observer_n_subject;
     switch (event) {
         case EventType::GAME_FIELD_UPDATE: {
@@ -94,12 +96,16 @@ void TetrisGameController::handleEvent_(
             std::lock_guard<std::mutex> lk{modelMut};
             isGameRun = false;
             break;
-        }   
+        }
+        case EventType::USER_ASKED_PAUSE_GAME: {
+            isGamePause = !isGamePause;
+            break;
+        }
     }
 }
 
 void TetrisGameController::update(
-    observer_n_subject::Subject& subject, observer_n_subject::EventType event) {
+    observer_n_subject::ISubject& subject, observer_n_subject::EventType event) {
     eventQueue_.push(event);
 }
 

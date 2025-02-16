@@ -27,7 +27,7 @@ public:
     void operator()(TetrisGameModelImpl__* ptr);
 };
 
-class TetrisGameModel final : public observer_n_subject::Subject {
+class TetrisGameModel final : public observer_n_subject::ISubject {
 public:
     TetrisGameModel(std::size_t fieldWidth = 21, std::size_t fieldHeight = 41);
 
@@ -36,10 +36,10 @@ public:
 public:
     // observer
     void attach(
-        std::shared_ptr<observer_n_subject::Observer> observer, 
+        std::shared_ptr<observer_n_subject::IObserver> observer, 
         observer_n_subject::EventType event) override;
 
-    void detach(std::shared_ptr<observer_n_subject::Observer> observer) override;
+    void detach(std::shared_ptr<observer_n_subject::IObserver> observer) override;
 
 public:
     // game interaction
@@ -52,9 +52,6 @@ public:
     bool rotateRightTetromino();     
     bool moveLeftTetromino();
     bool moveRightTetromino();
-
-private:
-    void notify(observer_n_subject::EventType event) override;
 
 private:
     std::unique_ptr<TetrisGameModelImpl__, TetrisGameModelImplDeleter> impl_;

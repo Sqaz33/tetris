@@ -20,30 +20,37 @@ enum class EventType: std::int8_t {
     USER_ASKED_RIGHT,
     USER_ASKED_DOWN,
     USER_ASKED_ROTATE_RIGHT,
-    USER_ASKED_CLOSE_GAME
+    USER_ASKED_CLOSE_GAME,
+    USER_ASKED_PAUSE_GAME
 };
 
-class Subject;
+class ISubject;
 
-class Observer {
+class IObserver {
 public:
-    virtual void update(Subject& subject, EventType event) = 0;
-    virtual ~Observer() {}
+    virtual void update(ISubject& subject, EventType event) = 0;
+    virtual ~IObserver() {}
 };
 
-class Subject {
+class ISubject {
 public:
-    virtual void attach(std::shared_ptr<Observer> observer, EventType event) = 0;
-    virtual void detach(std::shared_ptr<Observer> observer) = 0;
+    virtual void attach(std::shared_ptr<IObserver> observer, EventType event) = 0;
+    virtual void detach(std::shared_ptr<IObserver> observer) = 0;
+
+public:
+    virtual ~ISubject() {}
+};
+
+class SubjectImpl : public ISubject {
+public:
+    void attach(std::shared_ptr<IObserver> observer, EventType event) override;
+    void detach(std::shared_ptr<IObserver> observer) override;
 
 protected:
-    virtual void notify(EventType event) = 0;
-
-public:
-    virtual ~Subject() {}
+    void notify(EventType event);
 
 private:
-    std::vector<std::pair<std::weak_ptr<Observer>, EventType>> observers_;
+    std::vector<std::pair<std::weak_ptr<IObserver>, EventType>> observers_;
 };
 
 } // namespace observer_n_subject

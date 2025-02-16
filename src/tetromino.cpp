@@ -16,7 +16,7 @@ Tetromino::Tetromino(std::initializer_list<Block> shape, TetrominoType type) :
     for (const auto& p : shape) {
         greatestSide_ = std::max(greatestSide_, std::max(p.first + 1, p.second + 1));    
     }
-    setShapeBoundaries();
+    setShapeBoundaries_();
 }
 
 const std::vector<Block>& Tetromino::shape() const noexcept {
@@ -80,7 +80,7 @@ bool Tetromino::containsBlock(Block block) const noexcept {
     return false;
 }
 
-void Tetromino::swapShapeAxis() noexcept {
+void Tetromino::swapShapeAxis_() noexcept {
     int x_c = leftmostPointOnX_, y_c = highestPointOnY_ ;
     int x, y;
     for (auto& p : shape_) {
@@ -91,7 +91,7 @@ void Tetromino::swapShapeAxis() noexcept {
     }
 }
 
-void Tetromino::setShapeBoundaries() noexcept {  
+void Tetromino::setShapeBoundaries_() noexcept {  
     lowestPointOnY_ = INT_MIN;
     highestPointOnY_ = INT_MAX;
     leftmostPointOnX_ = INT_MAX;
@@ -105,16 +105,16 @@ void Tetromino::setShapeBoundaries() noexcept {
     }   
 }
 
-void Tetromino::reflectShape() noexcept {
+void Tetromino::reflectShape_() noexcept {
     for (auto& p : shape_) {
         p.first = rightmostPointOnX_ + leftmostPointOnX_ - p.first ;
     }
 }
 
 void Tetromino::rotateRigth() noexcept {
-    swapShapeAxis();
-    setShapeBoundaries();
-    reflectShape();
+    swapShapeAxis_();
+    setShapeBoundaries_();
+    reflectShape_();
 }
 
 Tetromino create_O_shape() {
@@ -187,7 +187,9 @@ Tetromino getRandomTetromino() {
     std::random_device rd;
     std::mt19937 gen(rd()); 
     std::uniform_int_distribution<> distrib(0, 6);
+#if 0
     return create_I_shape();
+#endif
     int r = distrib(gen);
     switch (r) {
         case 0: 

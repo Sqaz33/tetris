@@ -10,7 +10,7 @@
 
 namespace player_input {
 
-class IPlayerInput : public observer_n_subject::Subject { 
+class IPlayerInput : public observer_n_subject::SubjectImpl { 
 public:
     virtual void pollInput() = 0;
     virtual ~IPlayerInput() { }
@@ -23,15 +23,6 @@ public:
 public:
     void pollInput() override;
 
-// Subject methods
-public:
-    void attach(
-        std::shared_ptr<observer_n_subject::Observer> observer, observer_n_subject::EventType event) override;
-    void detach(std::shared_ptr<observer_n_subject::Observer> observer) override;
-
-private:
-    void notify(observer_n_subject::EventType event) override;
-
 private:
 
     void fireUserAskedLeft_();
@@ -39,6 +30,7 @@ private:
     void fireUserAskedDown_();
     void fireUserAskedRotateRight_();
     void fireUserAskedCloseGame_();
+    void fireUserAskedPauseGame_();
 
 private:
     std::shared_ptr<sf::RenderWindow> window_;
