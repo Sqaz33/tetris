@@ -214,8 +214,8 @@ DrawableGridCanvas::DrawableGridCanvas(float width,
 void DrawableGridCanvas::draw(sf::RenderWindow& window, sf::Vector2f start) {
     drawGrid_(window, start);
     for (const auto& cell : cells_) {
-        auto x = cell.pos.x;
-        auto y = cell.pos.y;
+        auto x = cell.pos.first;
+        auto y = cell.pos.second;
         drawCellAt_(x, y, start, window, cell.color);
     }
 }
@@ -224,7 +224,8 @@ std::pair<float, float> DrawableGridCanvas::size() const {
     return {width_, height_};
 }
 
-void DrawableGridCanvas::paintCell(sf::Vector2f pos, sf::Color color) {
+void DrawableGridCanvas::paintCell(
+    std::pair<std::size_t, std::size_t> pos, sf::Color color) {
     cells_.emplace_back(pos, color);
 }
 
@@ -233,10 +234,10 @@ void DrawableGridCanvas::clear() {
 }
 
 void DrawableGridCanvas::drawCellAt_(std::size_t cellX, 
-                                       std::size_t cellY,
-                                       sf::Vector2f start,
-                                       sf::RenderWindow& window,
-                                       sf::Color blockColor) 
+                                     std::size_t cellY,
+                                     sf::Vector2f start,
+                                     sf::RenderWindow& window,
+                                     sf::Color blockColor) 
 {   
     float x = start.x 
               + cellX * cellWidth_ 

@@ -27,6 +27,7 @@ public:
     virtual ~IDrawable() { }
 };
 
+// TODO: добавить поиск компонента по имени
 /**
  * @brief 
  * 
@@ -116,7 +117,7 @@ public:
     void draw(sf::RenderWindow& window, sf::Vector2f start) override;
     std::pair<float, float> size() const override;
     
-    void paintCell(sf::Vector2f pos, sf::Color color);
+    void paintCell(std::pair<std::size_t, std::size_t> pos, sf::Color color);
     void clear();
     sf::Color gridColor() const;
     void setGridColor(sf::Color color);
@@ -131,7 +132,7 @@ private:
 
 private:
     struct cell_t {
-        sf::Vector2f pos;
+        std::pair<std::size_t, std::size_t> pos;
         sf::Color color;
     };
 private:

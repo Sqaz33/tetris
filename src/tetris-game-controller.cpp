@@ -1,8 +1,9 @@
 #include "../include/tetris-game-controller.hpp"
 
-#include <thread>
-#include <iostream>
 #include <chrono>
+#include <iostream>
+#include <sstream>
+#include <thread>
 
 namespace tetris_game_controller {
 
@@ -10,12 +11,16 @@ TetrisGameController::TetrisGameController(
     std::shared_ptr<tetris_game_model::TetrisGameModel> gameModel,
     std::shared_ptr<player_input::IPlayerInput> playerInput,
     std::shared_ptr<sf::RenderWindow> window,
+    std::shared_ptr<view::DrawableText> viewText,
+    std::shared_ptr<view::DrawableGridCanvas> fieldView,
     std::shared_ptr<view::IDrawable> view) :
     gameModel_(gameModel)
     , playerInput_(playerInput)
     , window_(window)
-    , view_(view)
-{}
+    , textView_(viewText)
+    , fieldView_(fieldView)
+    , compositeView_(view)
+{ updateScoreView_(); }
 
 void TetrisGameController::registerAsObserver() {
     using namespace observer_n_subject;
@@ -32,7 +37,8 @@ void TetrisGameController::registerAsObserver() {
     playerInput_->attach(getThis(), EventType::USER_ASKED_PAUSE_GAME);
 }
 
-void TetrisGameController::runModel(std::mutex& modelMut, std::atomic_bool& isGameRun, std::atomic_bool& isGamePause) {
+void TetrisGameController::runModel(
+    std::mutex& modelMut, std::atomic_bool& isGameRun, std::atomic_bool& isGamePause) {
     gameLoop_(modelMut, isGameRun, isGamePause);
 } 
 
@@ -40,7 +46,8 @@ std::shared_ptr<TetrisGameController> TetrisGameController::getThis() {
     return shared_from_this();
 }
 
-void TetrisGameController::gameLoop_(std::mutex& modelMut, std::atomic_bool& isGameRun, std::atomic_bool& isGamePause) {
+void TetrisGameController::gameLoop_(
+    std::mutex& modelMut, std::atomic_bool& isGameRun, std::atomic_bool& isGamePause) {
     observer_n_subject::EventType event;
     while (isGameRun) {
         while (!eventQueue_.tryPop(event)) {
@@ -58,14 +65,14 @@ void TetrisGameController::handleEvent_(
     switch (event) {
         case EventType::GAME_FIELD_UPDATE: {
             std::lock_guard<std::mutex> lk{modelMut};
-            window_->clear();
-            view_->draw(*window_, {0, 0});
-            window_->display();
+            updateFieldView_();
+            redrawWindowNDisplay_();
             break;
         } 
         case EventType::GAME_SCORE_UPDATE: {
             std::lock_guard<std::mutex> lk{modelMut};
-            std::cout << "Your score: " << gameModel_->score() << '\n';
+            updateScoreView_();
+            redrawWindowNDisplay_();
             break;
         }
         case EventType::GAME_FINISH: {
@@ -103,6 +110,46 @@ void TetrisGameController::handleEvent_(
         }
     }
 }
+
+void TetrisGameController::updateScoreView_() {
+    std::stringstream ss;
+    ss << "Your Score: ";
+    ss << gameModel_->score();
+    textView_->setText(ss.str());
+}
+
+void TetrisGameController::updateFieldView_() {
+    fieldView_->clear();
+    decltype(auto) field = gameModel_->field();
+    for (std::size_t i = 0; i < gameModel_->fieldHeight(); ++i) {
+        for (std::size_t j = 0; j < gameModel_->fieldWidth(); ++j) {
+            auto color = tetrominoBlockColor_(field[i][j]);
+            fieldView_->paintCell({j, i}, color);
+        }
+    }
+}
+
+void TetrisGameController::redrawWindowNDisplay_() {
+    window_->clear(sf::Color::White);
+    compositeView_->draw(*window_, {0, 0});
+    window_->display();
+}
+
+sf::Color TetrisGameController::tetrominoBlockColor_(tetris_game_model::BlockType block) const {
+    using namespace tetris_game_model;
+    switch (block) {
+        case BlockType::O: return sf::Color::Blue;
+        case BlockType::I: return sf::Color::Cyan;
+        case BlockType::S: return sf::Color::Green;
+        case BlockType::Z: return sf::Color::Magenta;
+        case BlockType::L: return sf::Color::Red;
+        case BlockType::J: return sf::Color(128, 0, 128); // Фиолетовый
+        case BlockType::T: return sf::Color(255, 127, 80); // Коралловый
+        case BlockType::VOID: return sf::Color::White;
+        default: return sf::Color(128, 128, 128); // Серый
+    }
+}
+
 
 void TetrisGameController::update(
     observer_n_subject::ISubject& subject, observer_n_subject::EventType event) {

@@ -23,6 +23,8 @@ public:
         std::shared_ptr<tetris_game_model::TetrisGameModel> gameModel,
         std::shared_ptr<player_input::IPlayerInput> playerInput,
         std::shared_ptr<sf::RenderWindow> window,
+        std::shared_ptr<view::DrawableText> textView,
+        std::shared_ptr<view::DrawableGridCanvas> fieldView,
         std::shared_ptr<view::IDrawable> view);
 
     void registerAsObserver();
@@ -34,6 +36,10 @@ private:
     void handleEvent_(
         std::mutex& modelMut, std::atomic_bool& isGameRun, 
         std::atomic_bool& isGamePause,  observer_n_subject::EventType event);
+    void updateScoreView_();
+    void updateFieldView_();
+    void redrawWindowNDisplay_();
+    sf::Color tetrominoBlockColor_(tetris_game_model::BlockType block) const;
 
 //observer
 public:
@@ -45,7 +51,9 @@ private:
     std::shared_ptr<player_input::IPlayerInput> playerInput_;
     lock_based_queue::LockBasedQueue<observer_n_subject::EventType> eventQueue_;
     std::shared_ptr<sf::RenderWindow> window_;
-    std::shared_ptr<view::IDrawable> view_;
+    std::shared_ptr<view::DrawableText> textView_;
+    std::shared_ptr<view::DrawableGridCanvas> fieldView_;
+    std::shared_ptr<view::IDrawable> compositeView_;
 }; 
 
 } // namespace tetris_game_controller
