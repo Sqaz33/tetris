@@ -1,4 +1,8 @@
+#include <algorithm>
+#include <cmath>
 #include <iostream>
+#include <vector>
+#include <cassert>
 
 #include "../include/view.hpp"
 
@@ -10,26 +14,28 @@ using namespace tetris_game_model;
 
 namespace {
 
-void drawVerticaBlacklLine(sf::RenderWindow& window, 
+void drawVerticalLine(sf::RenderWindow& window, 
                            sf::Vector2f start, 
                            float lenght, 
-                           float thickness) 
+                           float thickness,
+                           sf::Color color) 
 {
     sf::RectangleShape line({lenght, thickness});
     line.setPosition({start.x + thickness, start.y});
-    line.setFillColor(sf::Color::Black);
+    line.setFillColor(color);
     line.rotate(sf::degrees(90));
     window.draw(line);
 }
 
-void drawHorizontalBlackLine(sf::RenderWindow& window, 
+void drawHorizontalLine(sf::RenderWindow& window, 
                              sf::Vector2f start, 
                              float lenght, 
-                             float thickness) 
+                             float thickness,
+                             sf::Color color) 
 {
     sf::RectangleShape line({lenght, thickness});
     line.setPosition(start);
-    line.setFillColor(sf::Color::Black);
+    line.setFillColor(color);
     window.draw(line);
 }
 
@@ -37,18 +43,105 @@ void drawHorizontalBlackLine(sf::RenderWindow& window,
 } // namespace 
 
 namespace view {
-void IDrawableComposite::pushComponent(std::shared_ptr<IDrawable> comp) {
-    components_.emplace_back(comp);
-}
 
+// ##################################################
+// IDrawableComposite
 void IDrawableComposite::draw(sf::RenderWindow& window, sf::Vector2f start) {
     for (auto comp : components_) {
         comp->draw(window, start);
     }
 }
 
+void IDrawableComposite::addComponent(std::shared_ptr<IDrawable> comp) {
+    components_.emplace_back(comp);
+}
 
-// #######################################
+void IDrawableComposite::deleteComponent(std::shared_ptr<IDrawable> comp) {
+    std::erase(components_, comp);
+}
+
+// ##################################################
+// DrawableStackLayout
+void DrawableStackLayout::draw(sf::RenderWindow& window, sf::Vector2f start) {
+    auto curStart = start;
+    auto it = components_.rbegin(); 
+    auto end = components_.rend();
+    for (auto comp = *it; it != end; ++it) {
+        comp = *it;
+        comp->draw(window, curStart);
+        auto compSz = comp->size();
+        curStart = {
+            curStart.x,
+            curStart.y + compSz.second
+        };
+    }
+}
+
+std::pair<float, float> DrawableStackLayout::size() const {
+    if (components_.empty()) return {0., 0.};
+
+    float width = components_.front()->size().first;
+    float height = 0;
+    for (const auto& comp : components_) {
+        width = std::max(width, comp->size().first);
+        height += comp->size().second;
+    }
+
+    return {width, height};
+}  
+
+// ##################################################
+// DrawableNestedLayout
+DrawableNestedLayout::DrawableNestedLayout(float widthOffset, float heightOffset) :
+    widthOffset_(widthOffset)
+    , heightOffset_(heightOffset)
+{}
+
+void DrawableNestedLayout::draw(sf::RenderWindow& window, sf::Vector2f start) {
+    auto curStart = start;
+    for (auto comp : components_) {
+        comp->draw(window, curStart);
+        curStart = {
+            curStart.x + widthOffset_,
+            curStart.y + heightOffset_
+        };
+    }
+}
+
+std::pair<float, float> DrawableNestedLayout::size() const {
+    if (components_.empty()) return {0., 0.};
+    return components_.front()->size();
+}
+
+void DrawableNestedLayout::addComponent(std::shared_ptr<IDrawable> comp) {
+    auto compSz = comp->size();
+    if (!components_.empty()) {
+        auto backSz = components_.back()->size();
+        if (compSz.first >= backSz.first || compSz.second >= backSz.second) {
+            assert(false);
+        }
+    }
+    IDrawableComposite::addComponent(comp);
+}
+
+float DrawableNestedLayout::widthOffset() const {
+    return widthOffset_;
+}
+
+float DrawableNestedLayout::heightOffset() const {
+    return heightOffset_;
+}
+
+void DrawableNestedLayout::setWidthOffset(float offset) {
+    widthOffset_ = offset;
+}
+
+void DrawableNestedLayout::setHeightOffset(float offset) {
+    heightOffset_ = offset;
+}
+
+// ##################################################
+// DrawableFrame
 DrawableFrame::DrawableFrame(float width, float height, float thickness, sf::Color color) :
         thickness_(thickness)
         , externalRect_({width, height})
@@ -76,78 +169,84 @@ void DrawableFrame::draw(sf::RenderWindow& window, sf::Vector2f start) {
     window.draw(internalRect_);
 }
 
+std::pair<float, float> DrawableFrame::size() const {
+    auto sz = externalRect_.getSize();
+    return {sz.x, sz.y};
+}
+
+void DrawableFrame::setThickness(float thickness) {
+    thickness_ = thickness;
+}
+
 float DrawableFrame::thickness() const { return thickness_; }
 
-
-// #######################################
-DrawableFramedWindow::DrawableFramedWindow(sf::RenderWindow& window, float thickness, sf::Color color) :
-    frame_(window.getSize().x, window.getSize().y, thickness, color)
-{}
-
-void DrawableFramedWindow::draw(sf::RenderWindow& window, sf::Vector2f start) {
-    frame_.draw(window, start);
-    drawComponents_(window, start);
+void DrawableFrame::setColor(sf::Color color) {
+    externalRect_.setFillColor(color);
+    internalRect_.setFillColor(color);
+    color_ = color;
 }
 
-void DrawableFramedWindow::drawComponents_(sf::RenderWindow& window, sf::Vector2f start) {
-    auto thickness = frame_.thickness();
-    sf::Vector2f compStart(
-        start.x + thickness,
-        start.y + thickness
-    );
-    IDrawableComposite::draw(window, compStart);
+sf::Color DrawableFrame::color() const {
+    return color_;
 } 
 
-// #######################################
-DrawableTetrisField::DrawableTetrisField(float width, 
-                                         float height, 
-                                         float gridThickness, 
-                                         std::shared_ptr<TetrisGameModel> model) : 
+// ##################################################
+// DrawableGridCanvas
+DrawableGridCanvas::DrawableGridCanvas(float width,
+                                      float height,
+                                      std::size_t widthInCells, 
+                                      std::size_t heightInCells, 
+                                      float gridThickness,
+                                      sf::Color gridColor) : 
     gridThickness_(gridThickness)
-    , model_(model)
     , width_(width)
     , height_(height)
+    , widthInCells_(widthInCells)
+    , heightInCells_(heightInCells)
+    , gridColor_(gridColor)
 {   
-    auto modelWidth = model_->fieldWidth();
-    auto modelHeight = model_->fieldHeight();
-    blockWidth_ = ((width - gridThickness_) - (gridThickness_ * modelWidth)) / modelWidth;
-    blockHeight_ = ((height - gridThickness_) - (gridThickness_ * modelHeight)) / modelHeight;
+    cellWidth_ = ((width - gridThickness_) - (gridThickness_ * widthInCells)) 
+                 / widthInCells;
+    cellHeight_ = ((height - gridThickness_) - (gridThickness_ * heightInCells)) 
+                 / heightInCells;
 }
 
-void DrawableTetrisField::draw(sf::RenderWindow& window, sf::Vector2f start) {
-    // using namespace tetris;
-    using namespace sf;
-    
+void DrawableGridCanvas::draw(sf::RenderWindow& window, sf::Vector2f start) {
     drawGrid_(window, start);
-    
-    decltype(auto) field = model_->field(); 
-    for (std::size_t y = 0; y < model_->fieldHeight(); ++y) {
-        for (std::size_t x = 0; x < model_->fieldWidth(); ++x) {
-            auto block = field[y][x];
-            if (block != BlockType::VOID) {
-                auto blockColor = block == BlockType::GHOST ? Color::Magenta : Color::Red;
-                drawBlockAt_(x, y, start, window, blockColor);
-            }
-        }
+    for (const auto& cell : cells_) {
+        auto x = cell.pos.x;
+        auto y = cell.pos.y;
+        drawCellAt_(x, y, start, window, cell.color);
     }
-
 }
 
-void DrawableTetrisField::drawBlockAt_(std::size_t blockX, 
-                                       std::size_t blockY,
+std::pair<float, float> DrawableGridCanvas::size() const {
+    return {width_, height_};
+}
+
+void DrawableGridCanvas::paintCell(sf::Vector2f pos, sf::Color color) {
+    cells_.emplace_back(pos, color);
+}
+
+void DrawableGridCanvas::clear() {
+    cells_.clear();
+}
+
+void DrawableGridCanvas::drawCellAt_(std::size_t cellX, 
+                                       std::size_t cellY,
                                        sf::Vector2f start,
                                        sf::RenderWindow& window,
                                        sf::Color blockColor) 
 {   
     float x = start.x 
-              + blockX * blockWidth_ 
-              + gridThickness_ * (blockX + 1);
+              + cellX * cellWidth_ 
+              + gridThickness_ * (cellX + 1);
     float y = start.y
-            + blockY * blockHeight_ 
-            + gridThickness_ * (blockY + 1);
+            + cellY * cellHeight_ 
+            + gridThickness_ * (cellY + 1);
     sf::Vector2f pos {x , y};
 
-    sf::RectangleShape block({blockWidth_, blockHeight_});
+    sf::RectangleShape block({cellWidth_, cellHeight_});
     block.setPosition(pos);
 
     block.setFillColor(blockColor);
@@ -156,30 +255,54 @@ void DrawableTetrisField::drawBlockAt_(std::size_t blockX,
 }
 
 
-void DrawableTetrisField::drawGrid_(sf::RenderWindow& window, sf::Vector2f start) {
+void DrawableGridCanvas::drawGrid_(sf::RenderWindow& window, sf::Vector2f start) {
     float limX = start.x + width_;
     int c = 0;
-    for (float x = start.x; x < limX; x += blockWidth_ + gridThickness_) {
-        drawVerticaBlacklLine(window, {x, start.y}, height_, gridThickness_);
+    for (float x = start.x; x < limX; x += cellWidth_ + gridThickness_) {
+        drawVerticalLine(window, {x, start.y}, height_, gridThickness_, gridColor_);
     }
 
     float limY = start.y + height_;
-    for (float y = start.y; y < limY; y += blockHeight_ + gridThickness_) {
-        drawHorizontalBlackLine(window, {start.x, y}, width_, gridThickness_);
+    for (float y = start.y; y < limY; y += cellHeight_ + gridThickness_) {
+        drawHorizontalLine(window, {start.x, y}, width_, gridThickness_, gridColor_);
     }
 }
 
-// void DrawableTetrisField::eraseCurTetromino_(sf::RenderWindow& window, sf::Vector2f start) {
-//     for (const auto& b : model_->curTetromino().shape()) {
-//         drawBlockAt_(b.first, b.second, start, window, sf::Color::White);
-//     }
-// }
+// ##################################################
+// DrawableText
+DrawableText::DrawableText(std::string txt, int characterSize, 
+                           std::string font, sf::Color color, 
+                           sf::Vector2f startPos) :
+    font_(font)
+    , characterSize_(characterSize)
+    , startPos_(startPos)
+    , sfTxt_(font_) 
+{
+    sfTxt_.setString(txt);
+    sfTxt_.setFillColor(color);
+    sfTxt_.setCharacterSize(characterSize_);
+}
 
-// void DrawableTetrisField::eraseCurTetrominoGhost_(sf::RenderWindow& window, sf::Vector2f start) {
-//     for (const auto& b : model_->curTetrominoGhost().shape()) {
-//         drawBlockAt_(b.first, b.second, start, window, sf::Color::White);
-//     }
-// }
+void DrawableText::draw(sf::RenderWindow& window, sf::Vector2f start) {
+    sf::Vector2f newStart = {
+        start.x + startPos_.x,
+        start.y + startPos_.y
+    };
+    sfTxt_.setPosition(newStart);
+    window.draw(sfTxt_);
+}
 
+std::pair<float, float> DrawableText::size() const {
+    auto boundsSz = sfTxt_.getLocalBounds().size;
+    return {boundsSz.x, boundsSz.y + characterSize_};
+}
+
+void DrawableText::setText(const std::string& txt) {
+    sfTxt_.setString(txt);
+}
+
+std::string DrawableText::text() const {
+    return sfTxt_.getString();
+}
 
 } // namespace view

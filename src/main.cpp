@@ -30,9 +30,9 @@ int main() {
     view::DrawableFramedWindow comp(window, 10, sf::Color::White);
 
     auto model = std::make_shared<TetrisGameModel>();
-    auto drawableField = std::make_shared<view::DrawableTetrisField>(530.f, 1030.f, 5.f, model); 
+    auto drawableField = std::make_shared<view::DrawableGridCanvas>(530.f, 1030.f, 5.f, model); 
 
-    comp.pushComponent(drawableField);
+    comp.addComponent(drawableField);
 
     auto modelUpdater = [&] {
         while (window.isOpen()) {
@@ -118,11 +118,10 @@ int main() {
     auto comp = std::make_shared<view::DrawableFramedWindow>(*window, 10, sf::Color::White);
 
     auto model = std::make_shared<TetrisGameModel>();
-    auto drawableField = std::make_shared<view::DrawableTetrisField>(530.f, 1030.f, 5.f, model); 
+    auto drawableField = std::make_shared<view::DrawableGridCanvas>(530.f, 1030.f, 5.f, model); 
 
     auto input = std::make_shared<player_input::KeyBoardInput>(window);
-
-    comp->pushComponent(drawableField);
+    comp->addComponent(drawableField);
 
     auto controller 
         = std::make_shared<tetris_game_controller::TetrisGameController>(model, input, window, comp);

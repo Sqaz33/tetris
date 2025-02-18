@@ -166,7 +166,6 @@ bool TetrisGameModelImpl__::setNextTetromino_() {
     return movementImpl_->setTetromino(nextTetromino);
 }
 
-
 // ##################################################
 // TetrisGameModelImplDeleter
 void TetrisGameModelImplDeleter::operator()(TetrisGameModelImpl__* ptr) {

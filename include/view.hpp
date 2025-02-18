@@ -2,12 +2,13 @@
 #define INCLUDE_VIEW_HPP
 
 #include <memory>
+#include <utility>
 #include <vector>
+#include <string>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
-// #include "tetris.hpp"
 #include "tetromino.hpp"
 #include "tetris-game-model.hpp"
 
@@ -15,19 +16,63 @@ using namespace tetris_game_model;
 
 namespace view {
 
+/**
+ * @brief 
+ * 
+ */
 class IDrawable {
 public:
     virtual void draw(sf::RenderWindow& window, sf::Vector2f start) = 0;
+    virtual std::pair<float, float> size() const = 0;
     virtual ~IDrawable() { }
 };
 
+/**
+ * @brief 
+ * 
+ */
 class IDrawableComposite : public IDrawable {
 public:
-    void pushComponent(std::shared_ptr<IDrawable> comp);
-    virtual void draw(sf::RenderWindow& window, sf::Vector2f start) = 0;
+    // TODO: мб сделать исключение по размеру окна и рисуемому компоненту
+    void draw(sf::RenderWindow& window, sf::Vector2f start) = 0;
+    // TODO: сделать исключения (??) по размерам 
+    virtual void addComponent(std::shared_ptr<IDrawable> comp);
+    void deleteComponent(std::shared_ptr<IDrawable> comp);
+protected:
+    std::vector<std::shared_ptr<IDrawable>> components_;
+};
+
+/**
+ * @brief 
+ * 
+ */
+class DrawableStackLayout final : public IDrawableComposite {    
+public:
+    void draw(sf::RenderWindow& window, sf::Vector2f start) override;
+    std::pair<float, float> size() const override;
+};
+
+/**
+ * @brief 
+ * 
+ */
+class DrawableNestedLayout final : public IDrawableComposite {
+public:
+    DrawableNestedLayout(float widthOffset, float heightOffset);
+
+public:
+    void draw(sf::RenderWindow& window, sf::Vector2f start) override;
+    std::pair<float, float> size() const override;
+    void addComponent(std::shared_ptr<IDrawable> comp) override;
+
+    float widthOffset() const;
+    float heightOffset() const;
+    void setWidthOffset(float offset);
+    void setHeightOffset(float offset);
 
 private:
-    std::vector<std::shared_ptr<IDrawable>> components_;
+    float widthOffset_;
+    float heightOffset_;
 };
 
 /**
@@ -40,7 +85,12 @@ public:
 
 public:
     void draw(sf::RenderWindow& window, sf::Vector2f start) override;
+    std::pair<float, float> size() const override;
+
+    void setThickness(float thickness);
     float thickness() const;
+    void setColor(sf::Color color);
+    sf::Color color() const;
 
 private:
     float thickness_;
@@ -50,57 +100,73 @@ private:
 };
 
 /**
- * @brief
- *
+ * @brief 
+ * 
  */
-class DrawableFramedWindow final : public IDrawableComposite {
+class DrawableGridCanvas final : public IDrawable {
 public:
-    DrawableFramedWindow(sf::RenderWindow& window, float thickness, sf::Color color);
+    DrawableGridCanvas(float width,
+                       float height,
+                       std::size_t widthInCells, 
+                       std::size_t heightInCells, 
+                       float gridThickness,
+                       sf::Color gridColor = sf::Color::Black);
 
 public:
-    void draw(sf::RenderWindow& window, sf::Vector2f start = { 0, 0 }) override;
+    void draw(sf::RenderWindow& window, sf::Vector2f start) override;
+    std::pair<float, float> size() const override;
+    
+    void paintCell(sf::Vector2f pos, sf::Color color);
+    void clear();
+    sf::Color gridColor() const;
+    void setGridColor(sf::Color color);
 
 private:
-    DrawableFrame frame_;
+    void drawCellAt_(std::size_t cellX, 
+                      std::size_t cellY,
+                      sf::Vector2f start,
+                      sf::RenderWindow& window,
+                      sf::Color blockColor);
+    void drawGrid_(sf::RenderWindow& window, sf::Vector2f start);
 
 private:
-    void drawComponents_(sf::RenderWindow& window, sf::Vector2f start);
+    struct cell_t {
+        sf::Vector2f pos;
+        sf::Color color;
+    };
+private:
+    std::vector<cell_t> cells_;
+    float gridThickness_;
+    std::size_t widthInCells_;
+    std::size_t heightInCells_;
+    float width_;
+    float height_;
+    float cellWidth_;
+    float cellHeight_;
+    sf::Color gridColor_;
 };
 
 /**
  * @brief 
  * 
  */
-class DrawableTetrisField final : public IDrawable {
+class DrawableText final : public IDrawable {
 public:
-    DrawableTetrisField(float width, 
-                        float height, 
-                        float gridThickness, 
-                        std::shared_ptr<TetrisGameModel> model);
+    DrawableText(std::string txt, int characterSize, 
+                 std::string font, sf::Color color = sf::Color::Black, 
+                 sf::Vector2f startPos = {0, 0});
 
 public:
     void draw(sf::RenderWindow& window, sf::Vector2f start) override;
-    std::shared_ptr<TetrisGameModel> model();
+    std::pair<float, float> size() const override;
+    void setText(const std::string& txt);
+    std::string text() const;
 
 private:
-    void drawBlockAt_(std::size_t blockX, 
-                      std::size_t blockY,
-                      sf::Vector2f start,
-                      sf::RenderWindow& window,
-                      sf::Color blockColor);
-    void drawGrid_(sf::RenderWindow& window, sf::Vector2f start);
-
-    // void drawCurTetromino_(sf::RenderWindow& window, sf::Vector2f start);
-    // void drawCurTetrominoGhost_(sf::RenderWindow& window, sf::Vector2f start);
-    // void eraseCurTetromino_(sf::RenderWindow& window, sf::Vector2f start);
-    // void eraseCurTetrominoGhost_(sf::RenderWindow& window, sf::Vector2f start);
-private:    
-    std::shared_ptr<TetrisGameModel> model_;
-    const float gridThickness_;
-    float blockWidth_;
-    float blockHeight_;
-    float width_;
-    float height_;
+    sf::Font font_;
+    int characterSize_;
+    sf::Vector2f startPos_;
+    sf::Text sfTxt_;
 };
 
 } // namespace view
