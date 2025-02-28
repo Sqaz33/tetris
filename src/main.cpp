@@ -21,16 +21,16 @@ int main() {
         550.f, 1050.f, 5.f, sf::Color::White);
 
     auto nestedL = std::make_shared<view::DrawableNestedLayout>(10.f, 10.f);
-    nestedL->addComponent(frame);
-    nestedL->addComponent(grid);
+    nestedL->addComponent(frame, "frame");
+    nestedL->addComponent(grid, "grid");
 
     
     auto text = std::make_shared<view::DrawableText>(
         "Your score:", 40, "calibri.ttf", sf::Color::Black, sf::Vector2f(10.f, 0.f));
 
     auto stackL = std::make_shared<view::DrawableStackLayout>();
-    stackL->addComponent(nestedL);
-    stackL->addComponent(text);
+    stackL->addComponent(nestedL, "nestedL");
+    stackL->addComponent(text, "score_text");
     
     std::pair<unsigned, unsigned> windowSz = stackL->size();
     auto window = std::make_shared<sf::RenderWindow>(
@@ -41,7 +41,7 @@ int main() {
     auto input = std::make_shared<player_input::KeyBoardInput>(window);
 
     auto controller 
-        = std::make_shared<tetris_game_controller::TetrisGameController>(model, input, window, text, grid, stackL);
+        = std::make_shared<tetris_game_controller::TetrisGameController>(model, input, window, stackL);
     controller->registerAsObserver();
 
     std::atomic_bool isGameRun = true;

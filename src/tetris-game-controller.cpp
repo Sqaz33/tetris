@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <cassert>
 
 namespace tetris_game_controller {
 
@@ -11,15 +12,11 @@ TetrisGameController::TetrisGameController(
     std::shared_ptr<tetris_game_model::TetrisGameModel> gameModel,
     std::shared_ptr<player_input::IPlayerInput> playerInput,
     std::shared_ptr<sf::RenderWindow> window,
-    std::shared_ptr<view::DrawableText> viewText,
-    std::shared_ptr<view::DrawableGridCanvas> fieldView,
-    std::shared_ptr<view::IDrawable> view) :
+    std::shared_ptr<view::IDrawableComposite> compositeView) :
     gameModel_(gameModel)
     , playerInput_(playerInput)
     , window_(window)
-    , textView_(viewText)
-    , fieldView_(fieldView)
-    , compositeView_(view)
+    , compositeView_(compositeView)
 { updateScoreView_(); }
 
 void TetrisGameController::registerAsObserver() {
@@ -115,16 +112,24 @@ void TetrisGameController::updateScoreView_() {
     std::stringstream ss;
     ss << "Your Score: ";
     ss << gameModel_->score();
-    textView_->setText(ss.str());
+    auto textView = std::dynamic_pointer_cast<view::DrawableText>(
+        compositeView_->getComponent("score_text")
+    );
+    assert(textView);
+    textView->setText(ss.str());
 }
 
 void TetrisGameController::updateFieldView_() {
-    fieldView_->clear();
+    auto fieldView = std::dynamic_pointer_cast<view::DrawableGridCanvas>(
+        compositeView_->getComponent("grid")
+    );
+    assert(fieldView);
+    fieldView->clear();
     decltype(auto) field = gameModel_->field();
     for (std::size_t i = 0; i < gameModel_->fieldHeight(); ++i) {
         for (std::size_t j = 0; j < gameModel_->fieldWidth(); ++j) {
             auto color = tetrominoBlockColor_(field[i][j]);
-            fieldView_->paintCell({j, i}, color);
+            fieldView->paintCell({j, i}, color);
         }
     }
 }

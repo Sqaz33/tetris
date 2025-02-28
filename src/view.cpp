@@ -46,22 +46,63 @@ namespace view {
 
 // ##################################################
 // IDrawableComposite
-void IDrawableComposite::draw(sf::RenderWindow& window, sf::Vector2f start) {
-    for (auto comp : components_) {
-        comp->draw(window, start);
+void IDrawableComposite::addComponent(
+    std::shared_ptr<IDrawable> comp, const std::string& name) {
+    auto it = components_.insert(components_.end(), comp);
+    componentsMap_.emplace(name, it);
+}
+
+std::shared_ptr<IDrawable> IDrawableComposite::getComponent(
+    const std::string& name) {
+    if (componentsMap_.contains(name)) {
+        return *componentsMap_[name];
     }
+    for (auto p : components_) {
+        auto drawable 
+            = std::dynamic_pointer_cast<IDrawableComposite>(p);
+        if (drawable) {
+            auto res = drawable->getComponent(name);
+            if (res) {
+                return res;
+            }
+        }     
+    }
+    return nullptr;
 }
 
-void IDrawableComposite::addComponent(std::shared_ptr<IDrawable> comp) {
-    components_.emplace_back(comp);
-}
-
-void IDrawableComposite::deleteComponent(std::shared_ptr<IDrawable> comp) {
-    std::erase(components_, comp);
+void IDrawableComposite::deleteComponent(const std::string& name) {
+    if (componentsMap_.contains(name)) {
+        auto it = componentsMap_.find(name);
+        components_.erase(it->second);
+        componentsMap_.erase(it);
+        return;
+    }
+    for (auto p : components_) {
+        auto drawable 
+            = std::dynamic_pointer_cast<IDrawableComposite>(p);
+        if (drawable) {
+            drawable->deleteComponent(name);
+        }     
+    }
 }
 
 // ##################################################
 // DrawableStackLayout
+
+void DrawableStackLayout::addComponent(
+    std::shared_ptr<IDrawable> comp, const std::string& name) {
+    IDrawableComposite::addComponent(comp, name);
+}
+
+std::shared_ptr<IDrawable> DrawableStackLayout::getComponent(
+    const std::string& name) {
+    return IDrawableComposite::getComponent(name);
+}
+
+void DrawableStackLayout::deleteComponent(const std::string& name) {
+    IDrawableComposite::deleteComponent(name);
+}
+
 void DrawableStackLayout::draw(sf::RenderWindow& window, sf::Vector2f start) {
     auto curStart = start;
     auto it = components_.rbegin(); 
@@ -113,7 +154,8 @@ std::pair<float, float> DrawableNestedLayout::size() const {
     return components_.front()->size();
 }
 
-void DrawableNestedLayout::addComponent(std::shared_ptr<IDrawable> comp) {
+void DrawableNestedLayout::addComponent(
+    std::shared_ptr<IDrawable> comp, const std::string& name) {
     auto compSz = comp->size();
     if (!components_.empty()) {
         auto backSz = components_.back()->size();
@@ -121,7 +163,16 @@ void DrawableNestedLayout::addComponent(std::shared_ptr<IDrawable> comp) {
             assert(false);
         }
     }
-    IDrawableComposite::addComponent(comp);
+    IDrawableComposite::addComponent(comp, name);
+}
+
+std::shared_ptr<IDrawable> DrawableNestedLayout::getComponent(
+    const std::string& name) {
+    return IDrawableComposite::getComponent(name);
+}
+
+void DrawableNestedLayout::deleteComponent(const std::string& name) {
+    IDrawableComposite::deleteComponent(name);
 }
 
 float DrawableNestedLayout::widthOffset() const {

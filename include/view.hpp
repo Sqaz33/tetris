@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <map>
+#include <list>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -37,10 +39,20 @@ public:
     // TODO: мб сделать исключение по размеру окна и рисуемому компоненту
     void draw(sf::RenderWindow& window, sf::Vector2f start) = 0;
     // TODO: сделать исключения (??) по размерам 
-    virtual void addComponent(std::shared_ptr<IDrawable> comp);
-    void deleteComponent(std::shared_ptr<IDrawable> comp);
+    virtual void addComponent(
+        std::shared_ptr<IDrawable> comp, const std::string& name) = 0;
+
+    virtual std::shared_ptr<IDrawable> getComponent(
+        const std::string& name) = 0;
+
+    virtual void deleteComponent(const std::string& name) = 0;
+
+private:
+    std::map<std::string, 
+            std::list<std::shared_ptr<IDrawable>>::iterator
+        > componentsMap_;
 protected:
-    std::vector<std::shared_ptr<IDrawable>> components_;
+    std::list<std::shared_ptr<IDrawable>> components_;
 };
 
 /**
@@ -51,6 +63,16 @@ class DrawableStackLayout final : public IDrawableComposite {
 public:
     void draw(sf::RenderWindow& window, sf::Vector2f start) override;
     std::pair<float, float> size() const override;
+
+public:
+    void addComponent(
+        std::shared_ptr<IDrawable> comp, const std::string& name) override;
+
+    std::shared_ptr<IDrawable> getComponent(
+        const std::string& name) override;
+
+    void deleteComponent(const std::string& name) override;
+
 };
 
 /**
@@ -64,8 +86,17 @@ public:
 public:
     void draw(sf::RenderWindow& window, sf::Vector2f start) override;
     std::pair<float, float> size() const override;
-    void addComponent(std::shared_ptr<IDrawable> comp) override;
 
+public:
+    void addComponent(
+        std::shared_ptr<IDrawable> comp, const std::string& name) override;
+
+    std::shared_ptr<IDrawable> getComponent(
+        const std::string& name) override;
+
+    void deleteComponent(const std::string& name) override;
+
+public:
     float widthOffset() const;
     float heightOffset() const;
     void setWidthOffset(float offset);
